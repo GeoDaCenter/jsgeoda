@@ -1,0 +1,52 @@
+{
+  "name": "jsgeoda",
+  "scripts": {
+    "build:wasm": "node tools/binary-to-json src/jsgeoda.wasm > src/jsgeoda-wasm.json",
+    "build:bundle": "webpack",
+    "build": "npm run && npm run build:wasm && npm run build:bundle",
+    "serve": "http-server",
+    "start": "npm run build && npm run serve",
+    "doc" : "jsdoc -d docs --configure jsconf.json --readme README.md"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.1.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babelify": "^10.0.0",
+    "exports-loader": "^0.7.0",
+    "file-loader": "^1.1.11",
+    "http-server": "^0.12.3",
+    "jsdoc": "^3.6.6",
+    "tape": "^5.0.1",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.1"
+  },
+  "version": "0.1.1",
+  "description": "A js wrapper for jsgeoda-wasm. ",
+  "main": "./lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lixun910/jsgeoda.git"
+  },
+  "keywords": [
+    "jsgeoda",
+    "spatial analysis",
+    "libgeoda",
+    "geoda"
+  ],
+  "author": "Xun Li <lixun910@gmail.com> (http://lixun910.github.io)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lixun910/jsgeoda/issues"
+  },
+  "homepage": "https://github.com/lixun910/jsgeoda#readme",
+  "dependencies": {
+    "install": "^0.13.0",
+    "npm": "^6.14.8"
+  },
+  "directories": {
+    "lib": "lib"
+  }
+}

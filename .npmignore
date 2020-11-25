@@ -1,0 +1,7 @@
+src/
+node_module/
+tests/
+tools/
+.vscode/
+.gitattributes
+webpack.config.js
