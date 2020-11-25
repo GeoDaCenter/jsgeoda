@@ -16,7 +16,6 @@ module.exports = {
   node: {
     fs: "empty" 
   },
-  mode: "development",
   module: {
     rules: [
       // Emscripten JS files define a global. With `exports-loader` we can 

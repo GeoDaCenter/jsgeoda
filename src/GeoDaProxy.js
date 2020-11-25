@@ -2,10 +2,11 @@
 // date: 10/7/2020 version 0.0.4
 
 /**
- * Use jsgeoda.New() to get an instance of GeoDaProxy. See New()
+ * Use jsgeoda.New() to get an instance of GeoDaProxy. See New() {@link New}
+ * @see New
  * @class
  * @classdesc GeoDaProxy is a class that wraps all the APIs of libgeoda WASM.
- * Always use jsgeoda.New() to get an instance of GeoDaProxy.
+ * Always use jsgeoda.{@link New}() to get an instance of GeoDaProxy.
  */
 class GeoDaProxy {
 
@@ -117,7 +118,8 @@ class GeoDaProxy {
    */
   GetNumericCol(map_uid, col_name) {
     // return VectorDouble
-    return this.wasm.get_numeric_col(map_uid, col_name)
+    let vals = this.wasm.get_numeric_col(map_uid, col_name)
+    return this.parseVecDouble(vals);
   }
 
   /**

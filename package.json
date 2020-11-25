@@ -6,7 +6,8 @@
     "build": "npm run && npm run build:wasm && npm run build:bundle",
     "serve": "http-server",
     "start": "npm run build && npm run serve",
-    "doc" : "jsdoc -d docs --configure jsconf.json --readme README.md"
+    "doc" : "jsdoc -d docs --configure jsconf.json --readme README.md",
+    "publish": "npm run build:bundle && npm publish --access public"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
@@ -23,7 +24,7 @@
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.1"
   },
-  "version": "0.1.1",
+  "version": "0.1.6",
   "description": "A js wrapper for jsgeoda-wasm. ",
   "main": "./lib/index.js",
   "repository": {

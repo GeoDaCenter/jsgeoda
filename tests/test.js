@@ -3,22 +3,12 @@ const fs = require('fs');
 
 
 async function test() {
+    try {
     var t0 = new Date().getTime();
     let geoda = await jsgeoda.New();
     var t1 = new Date().getTime();
     console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
 
-    let ab = fs.readFileSync('./tests/natregimes.geojson').buffer;
-    const uint8_t_arr = new Uint8Array(ab);
-    let map_uid = geoda.ReadGeojsonMap('map_uid', ab);
-    console.log('map id:',map_uid);
-    let cent = geoda.GetCentroids(map_uid);
-    console.log(cent);
-}
-
-test();
-
-jsgeoda.Init(function(geoda) {
     let ab = fs.readFileSync('./tests/natregimes.geojson').buffer;
     const uint8_t_arr = new Uint8Array(ab);
     let map_uid = geoda.ReadGeojsonMap('map_uid', ab);
@@ -48,4 +38,9 @@ jsgeoda.Init(function(geoda) {
     var t1 = new Date().getTime();
     //console.log(clst);
     console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
-});
+    } catch (err)  {
+        console.log(err);
+    }
+}
+
+test();
