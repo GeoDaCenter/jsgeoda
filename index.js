@@ -7,24 +7,7 @@ import GeoDaProxy from './src/GeoDaProxy.js';
 // initialization of libgeoda WASM module
 var jsgeoda_wasm = null;
 
-function Init(callback) {
-  if (jsgeoda_wasm == null) {
-    console.log("here2");
-    jsgeoda().then(wasm=>{
-        jsgeoda_wasm = wasm;
-        let geoda_proxy = new GeoDaProxy.GeoDaProxy(wasm);
-        callback(geoda_proxy);
-    });
-  } else {
-    console.log("here1");
-    let geoda_proxy = new GeoDaProxy.GeoDaProxy(jsgeoda_wasm);
-    callback(geoda_proxy);
-  }
-}
-
-exports.Init = Init;
-
-function New() {
+function Init() {
   return new Promise((res, rej) => {
     jsgeoda().then(wasm=>{
       jsgeoda_wasm = wasm;
@@ -45,4 +28,4 @@ function New() {
  * 
  * @returns {Object} geoda - a GeoDaProxy instance built from WASM
  */
-exports.New = New;
+exports.New = Init;
