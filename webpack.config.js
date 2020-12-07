@@ -1,5 +1,7 @@
 const webpack = require("webpack");
 const path = require("path");
+const CompressionPlugin = require("compression-webpack-plugin");
+
 
 module.exports = {
   mode: "production",
@@ -16,6 +18,7 @@ module.exports = {
   node: {
     fs: "empty" 
   },
+  plugins: [new CompressionPlugin()],
   module: {
     rules: [
       // Emscripten JS files define a global. With `exports-loader` we can 

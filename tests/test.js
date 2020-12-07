@@ -9,7 +9,8 @@ async function test() {
     var t1 = new Date().getTime();
     console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
 
-    let ab = fs.readFileSync('./tests/natregimes.geojson').buffer;
+    let geojson = fs.readFileSync('./tests/natregimes.geojson');
+    let ab = geojson.buffer;
     const uint8_t_arr = new Uint8Array(ab);
     let map_uid = geoda.ReadGeojsonMap('map_uid', ab);
     console.log('map id:',map_uid);
