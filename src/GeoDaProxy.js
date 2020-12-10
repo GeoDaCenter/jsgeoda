@@ -353,7 +353,7 @@ class GeoDaProxy {
    * @returns {Array} Returns an array of break point values.
    */
   natural_breaks(map_uid, k, values) {
-    return this.custom_breaks(map_uid, "natural_breaks", k, nul, values);
+    return this.custom_breaks(map_uid, "natural_breaks", k, null, values);
   }
 
   /**
@@ -364,7 +364,7 @@ class GeoDaProxy {
    * @returns {Array} Returns an array of break point values.
    */
   quantile_breaks(map_uid, k, values) {
-    return this.custom_breaks(map_uid, "quantile_breaks", k, nul, values);
+    return this.custom_breaks(map_uid, "quantile_breaks", k, null, values);
   }
 
    /**
@@ -375,7 +375,7 @@ class GeoDaProxy {
    * @returns {Array} Returns an array of break point values.
    */
   stddev_breaks(map_uid, k, values) {
-    return this.custom_breaks(map_uid, "stddev_breaks", k, nul, values);
+    return this.custom_breaks(map_uid, "stddev_breaks", k, null, values);
   }
 
   /**
@@ -386,7 +386,7 @@ class GeoDaProxy {
    * @returns {Array} Returns an array of break point values.
    */
   hinge15_breaks(map_uid, k, values) {
-    return this.custom_breaks(map_uid, "hinge15_breaks", k, nul, values);
+    return this.custom_breaks(map_uid, "hinge15_breaks", k, null, values);
   }
 
   /**
@@ -397,7 +397,11 @@ class GeoDaProxy {
    * @returns {Array} Returns an array of break point values.
    */
   hinge30_breaks(map_uid, k, values) {
-    return this.custom_breaks(map_uid, "hinge30_breaks", k, nul, values);
+    return this.custom_breaks(map_uid, "hinge30_breaks", k, null, values);
+  }
+
+  isInt(n) {
+    return Number(n) === n && n % 1 === 0;
   }
 
   custom_breaks(map_uid, break_name, k, sel_field, values) {
@@ -414,13 +418,13 @@ class GeoDaProxy {
     let id_array = [];
     for (let i = 0; i < breaks.length; ++i) {
       id_array.push([]);
-      let txt = isInt(breaks[i]) ? breaks[i] : breaks[i].toFixed(2);
+      let txt = this.isInt(breaks[i]) ? breaks[i] : breaks[i].toFixed(2);
       bins.push("" + txt);
     }
     id_array.push([]);
     let txt = breaks[breaks.length - 1];
     if (txt != undefined) {
-      txt = isInt(txt) ? txt : txt.toFixed(2);
+      txt = this.isInt(txt) ? txt : txt.toFixed(2);
       bins.push(">" + txt);
     }
 
