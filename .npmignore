@@ -5,3 +5,4 @@ tools/
 .vscode/
 .gitattributes
 webpack.config.js
+index.js.gz

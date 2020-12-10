@@ -25,7 +25,7 @@
     "webpack": "^4.20.2",
     "webpack-cli": "^3.3.12"
   },
-  "version": "0.1.6",
+  "version": "0.1.8",
   "description": "A js wrapper for jsgeoda-wasm. ",
   "main": "./lib/index.js",
   "repository": {
