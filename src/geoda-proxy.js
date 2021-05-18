@@ -1,5 +1,6 @@
 // author: lixun910@gmail.com
 // date: 10/7/2020 version 0.0.4
+// date: 5/14/2021 version 0.0.8
 
 /**
  * Use jsgeoda.New() to get an instance of GeoDaProxy. See New() {@link New}
@@ -17,7 +18,7 @@ class GeoDaProxy {
    * @param {Object} wasm The object of libgeoda WASM  
    */
   constructor(wasm) {
-    this.version = '0.0.4';
+    this.version = '0.0.8';
     this.wasm = wasm;
     this.geojson_maps = {};
   }
@@ -48,14 +49,26 @@ class GeoDaProxy {
     //Now that we have a block of memory we can copy the file data into that block
     this.wasm.HEAPU8.set(uint8_t_arr, uint8_t_ptr);
     // pass the address of the this.wasm memory we just allocated to our function
-    //this.wasm.new_geojsonmap(map_uid, uint8_t_ptr, uint8_t_arr.length);
-    this.wasm.ccall("new_geojsonmap1", null, ["string", "number", "number"], [map_uid, uint8_t_ptr, uint8_t_arr.length]);
+    this.wasm.new_geojsonmap(map_uid, uint8_t_ptr, uint8_t_arr.length);
+    //this.wasm.ccall("new_geojsonmap", null, ["string", "number", "number"], [map_uid, uint8_t_ptr, uint8_t_arr.length]);
 
     //Lastly, according to the docs, we should call ._free here.
     this.wasm._free(uint8_t_ptr);
     // store the map and map type
     let map_type = this.wasm.get_map_type(map_uid);
     this.geojson_maps[map_uid] = map_type;
+    return map_uid;
+  }
+
+  ReadShapefileMap(map_uid, data) {
+    const uint8_t_shp = new Uint8Array(data.shp);
+    const uint8_t_dbf = new Uint8Array(data.dbf);
+    const uint8_t_shx = new Uint8Array(data.shx);
+    // canread, canwrite, canown
+    this.wasm.FS_createDataFile('/', map_uid + '.shp', uint8_t_shp, true, true, true);
+    this.wasm.FS_createDataFile('/', map_uid + '.dbf', uint8_t_dbf, true, true, true);
+    this.wasm.FS_createDataFile('/', map_uid + '.shx', uint8_t_shx, true, true, true);
+    this.wasm.new_shapefilemap(map_uid);
     return map_uid;
   }
 
@@ -219,12 +232,13 @@ class GeoDaProxy {
   /**
    * Apply local Moran statistics with 999 permutations, which can not be changed in v0.0.4
    * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
-   * @param {String} weight_uid A unique string represents the created weights.
+   * @param {String} weights The weights object {@link WeightsResult} 
    * @param {Array} values The values that local moran statistics will be applied on.
    * @returns {Object} An instance of {@link LisaResult}
    */
-  local_moran(map_uid, weight_uid, values) {
-    return this.wasm.local_moran1(map_uid, weight_uid, this.toVecDouble(values));
+  local_moran(map_uid, weights, values) {
+    const weight_uid = weights.get_uid();
+    return this.wasm.local_moran(map_uid, weight_uid, this.toVecDouble(values));
   }
 
   /**

@@ -1,7 +1,7 @@
 // load webassembly
 // https://gist.github.com/surma/b2705b6cca29357ebea1c9e6e15684cc
-import jsgeoda from './src/jsgeoda.js';
-import GeoDaProxy from './src/GeoDaProxy.js';
+import jsgeoda from './jsgeoda.js';
+import GeoDaProxy from './geoda-proxy.js';
 
 // jsgeoda_wasm is a global variable that caches the return from 
 // initialization of libgeoda WASM module
