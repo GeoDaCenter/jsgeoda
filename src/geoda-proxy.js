@@ -35,13 +35,13 @@ class GeoDaProxy {
    * const geoda = await jsgeoda.New();
    * 
    * let ab = fs.readFileSync("NAT.geojson").buffer;
-   * let nat = geoda.ReadGeojsonMap("NAT", ab);
-   * let num_obs = geoda.GetNumObs(nat);
+   * let nat = geoda.read_geojson("NAT", ab);
+   * let num_obs = geoda.get_numobs(nat);
    * 
    * @param {String} map_uid A unique string that represent the geojson map. E.g. the geojson file name.
    * @param {ArrayBuffer} ab The content of the geojson file in format of ArrayBuffer.
    */
-  ReadGeojsonMap(map_uid, ab) {
+  read_geojson(map_uid, ab) {
     //evt.target.result is an ArrayBuffer. In js, 
     const uint8_t_arr = new Uint8Array(ab);
     //First we need to allocate the wasm memory. 
@@ -54,13 +54,20 @@ class GeoDaProxy {
 
     //Lastly, according to the docs, we should call ._free here.
     this.wasm._free(uint8_t_ptr);
+
     // store the map and map type
     let map_type = this.wasm.get_map_type(map_uid);
     this.geojson_maps[map_uid] = map_type;
     return map_uid;
   }
 
-  ReadShapefileMap(map_uid, data) {
+  /**
+   * Deprecated!!
+   * @param {String} map_uid 
+   * @param {ArrayBuffer} data 
+   * @returns 
+   */
+  read_shapefile(map_uid, data) {
     const uint8_t_shp = new Uint8Array(data.shp);
     const uint8_t_dbf = new Uint8Array(data.dbf);
     const uint8_t_shx = new Uint8Array(data.shx);
@@ -77,7 +84,7 @@ class GeoDaProxy {
    * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
    * @returns {Boolean} Returns True if the geojson map has been read. Otherwise, returns False.
    */
-  Has(map_uid) {
+  has(map_uid) {
     return map_uid in this.geojson_maps;
   }
 
@@ -92,13 +99,13 @@ class GeoDaProxy {
    * const geoda = await jsgeoda.New();
    * 
    * let ab = fs.readFileSync("NAT.geojson").buffer;
-   * let nat = geoda.ReadGeojsonMap("NAT", ab);
-   * let cent = geoda.GetCentroids(nat);
+   * let nat = geoda.read_geojson("NAT", ab);
+   * let cent = geoda.get_centroids(nat);
    * 
    * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
    * @returns {Array} Returns an array of [x,y] coordinates (no projection applied) of the centroids.
    */
-  GetCentroids(map_uid) {
+  get_centroids(map_uid) {
     let cc = this.wasm.get_centroids(map_uid);
     let xx = cc.get_x();
     let yy = cc.get_y();
@@ -114,25 +121,45 @@ class GeoDaProxy {
    * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
    * @returns {Number} Returns the number of observations or rows in the geojson map.
    */
-  GetNumObs(map_uid) {
+  get_numobs(map_uid) {
     let n = this.wasm.get_num_obs(map_uid);
     return n;
   }
 
-  GetMapType(map_uid) {
+  /**
+   * 
+   * @param {String} map_uid  A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @returns Returns the map type of the geojson map
+   */
+  get_maptype(map_uid) {
     return this.geojson_maps[map_uid];
   }
 
   /**
-   * Get the numeric values of a column or field. 
+   * Get the column names of the geojson map
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @returns {Array} Returns the column names
+   */
+  get_colnames(map_uid) {
+    const names = this.wasm.get_col_names(map_uid);
+    return this.parseVecString(names);
+  }
+
+  /**
+   * Get the values (numeric|string) of a column or field. 
    * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
    * @param {String} col_name A string of column or field name.
    * @returns {Array} Returns the values of a column of field. 
    */
-  GetNumericCol(map_uid, col_name) {
-    // return VectorDouble
-    let vals = this.wasm.get_numeric_col(map_uid, col_name)
-    return this.parseVecDouble(vals);
+  get_col(map_uid, col_name) {
+    const is_numeric = this.wasm.is_numeric_col;
+    if (is_numeric) {
+      const vals = this.wasm.get_numeric_col(map_uid, col_name);
+      return this.parseVecDouble(vals); 
+    } else {
+      const vals = this.wasm.get_string_col(map_uid, col_name);
+      return this.parseVecString(vals); 
+    }
   }
 
   /**
@@ -143,7 +170,7 @@ class GeoDaProxy {
    * @param {Number} precision_threshold Used when the precision of the underlying shape file is insufficient to allow for an exact match of coordinates to determine which polygons are neighbors. 
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
-  CreateRookWeights(map_uid, order, include_lower_order, precision_threshold) {
+  createRookWeights(map_uid, order, include_lower_order, precision_threshold) {
     let w_uid = this.wasm.rook_weights(map_uid, order, include_lower_order, precision_threshold);
     return w_uid;
   }
@@ -156,7 +183,7 @@ class GeoDaProxy {
    * @param {Number} precision_threshold Used when the precision of the underlying shape file is insufficient to allow for an exact match of coordinates to determine which polygons are neighbors. 
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
-  CreateQueenWeights(map_uid, order, include_lower_order, precision) {
+  createQueenWeights(map_uid, order, include_lower_order, precision) {
     let w_uid = this.wasm.queen_weights(map_uid, order, include_lower_order, precision);
     return w_uid;
   }
@@ -168,7 +195,7 @@ class GeoDaProxy {
    * @param {Boolean} is_mile A bool flag indicates if the distance unit is mile (true) or km (false). 
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
-  GetMinDistThreshold(map_uid, is_arc, is_mile) {
+  getMinDistThreshold(map_uid, is_arc, is_mile) {
     let val = this.wasm.min_distance_threshold(map_uid, is_arc, is_mile);
     return val;
   }
@@ -183,7 +210,7 @@ class GeoDaProxy {
    * @param {Boolean} is_mile A bool flag indicates if the distance unit is mile (true) or km (false). 
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
-  CreateKnnWeights(map_uid, k, power, is_inverse, is_arc, is_mile) {
+  createKnnWeights(map_uid, k, power, is_inverse, is_arc, is_mile) {
     let w = this.wasm.knn_weights(map_uid, k, power, is_inverse, is_arc, is_mile);
     return w;
   }
@@ -198,7 +225,7 @@ class GeoDaProxy {
    * @param {Boolean} is_mile A bool flag indicates if the distance unit is mile (true) or km (false). 
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
-  CreateDistWeights(map_uid, dist_thres, power, is_inverse, is_arc, is_mile) {
+  createDistWeights(map_uid, dist_thres, power, is_inverse, is_arc, is_mile) {
     let w = this.wasm.dist_weights(map_uid, dist_thres, power, is_inverse, is_arc, is_mile);
     return w;
   }
@@ -215,12 +242,12 @@ class GeoDaProxy {
    * @param {Boolean} is_mile A bool flag indicates if the distance unit is mile (true) or km (false). 
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
-  CreateKernelWeights(map_uid, k, kernel, adaptive_bandwidth, use_kernel_diagonals, is_arc, is_mile) {
+  createKernelWeights(map_uid, k, kernel, adaptive_bandwidth, use_kernel_diagonals, is_arc, is_mile) {
     let w = this.wasm.kernel_weights(map_uid, k, kernel, adaptive_bandwidth, use_kernel_diagonals, is_arc, is_mile);
     return w;
   }
 
-  CreateKernelBandwidthWeights(map_uid, dist_thres, kernel, use_kernel_diagonals, is_arc, is_mile) {
+  createKernelBandwidthWeights(map_uid, dist_thres, kernel, use_kernel_diagonals, is_arc, is_mile) {
     let w = this.wasm.kernel_bandwidth_weights(map_uid, dist_thres, kernel, use_kernel_diagonals, is_arc, is_mile);
     return w;
   }
