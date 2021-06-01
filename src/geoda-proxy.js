@@ -308,7 +308,7 @@ class GeoDaProxy {
   }
 
   /**
-   * Create a kernel weights with fixed bandwidth.
+   * Create a (adaptive) KNN kernel weights.
    * 
    * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
    * @param {Number} k A positive integer number for k-nearest neighbors
@@ -336,7 +336,22 @@ class GeoDaProxy {
     return w;
   }
 
-  kernel_weights(map_uid, dist_thres, kernel, use_kernel_diagonals, power, is_inverse, is_arc, is_mile) {
+  /**
+   * 
+   * Create a kernel weights with fixed bandwidth.
+   * 
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {Number} bandwidth The bandwidth (distance threshold).
+   * @param {String} kernel The name of the kernel function, which could be one of the following: * triangular * uniform * quadratic * epanechnikov * quartic * gaussian
+   * @param {Boolean} adaptive_bandwidth A bool flag indicates whether to use adaptive bandwidth or the max distance of all observation to their k-nearest neighbors. 
+   * @param {Boolean} use_kernel_diagonals A bool flag indicates whether or not the lower order neighbors should be included in the weights structure.
+   * @param {Number} power  The power (or exponent) indicates how many times to use the number in a multiplication.
+   * @param {Boolean} is_inverse A bool flag indicates whether or not to apply inverse on distance value.
+   * @param {Boolean} is_arc  A bool flag indicates if compute arc distance (true) or Euclidean distance (false).
+   * @param {Boolean} is_mile A bool flag indicates if the distance unit is mile (true) or km (false). 
+   * @returns {Object} An instance of {@link GeoDaWeights} 
+   */
+  kernel_weights(map_uid, bandwidth, kernel, use_kernel_diagonals, power, is_inverse, is_arc, is_mile) {
     if (!(kernel in  {'triangular':true, 'uniform':true, 'epanechnikov':true, 'quartic':true, 'gaussian':true})) {
       console.log("kernel has to be one of  {'triangular', 'uniform', 'epanechnikov', 'quartic', 'gaussian'}");
       return null;
@@ -347,7 +362,7 @@ class GeoDaProxy {
     if (!is_arc) is_arc = false;
     if (!is_mile) is_mile = true;
 
-    let w = this.wasm.kernel_bandwidth_weights(map_uid, dist_thres, kernel, use_kernel_diagonals, power, is_inverse, is_arc, is_mile);
+    let w = this.wasm.kernel_bandwidth_weights(map_uid, bandwidth, kernel, use_kernel_diagonals, power, is_inverse, is_arc, is_mile);
     return w;
   }
 
@@ -357,12 +372,12 @@ class GeoDaProxy {
 
   /**
    * Apply local Moran statistics with 999 permutations, which can not be changed in v0.0.4
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
    * @param {String} weights The weights object {@link WeightsResult} 
    * @param {Array} values The values that local moran statistics will be applied on.
    * @returns {Object} An instance of {@link LisaResult}
    */
-  local_moran(map_uid, weights, values) {
+  local_moran(weights, values) {
+    const map_uid = weights.get_map_uid();
     const weight_uid = weights.get_uid();
     return this.wasm.local_moran(map_uid, weight_uid, this.toVecDouble(values));
   }
@@ -413,16 +428,26 @@ class GeoDaProxy {
 
   /**
    * Get neighbors (indices) of an observation.
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
-   * @param {String} w A created weights object.
+   * @param {String} weights The weights object {@link WeightsResult} 
    * @param {Number} idx An integer number represents the index of which observation to get its neighbors.
    */
-  get_neighbors(map_uid, w, idx) {
-    let nbrs = this.wasm.get_neighbors(map_uid, w.get_uid(), idx);
+  get_neighbors(weights, idx) {
+    const map_uid = weights.get_map_uid();
+    const w_uid = weights.get_uid();
+    
+    let nbrs = this.wasm.get_neighbors(map_uid, w_uid, idx);
     return this.parseVecInt(nbrs);
   }
 
-  get_connectivity(map_uid, w) {
+  /**
+   * 
+   * @param {String} weights The weights object {@link WeightsResult} 
+   * @returns 
+   */
+  get_connectivity(weights) {
+    const map_uid = weights.get_map_uid();
+    const w_uid = weights.get_uid();
+
     const centroids = this.get_centroids(map_uid);
     const numobs = this.get_numobs(map_uid);
     const arcs = [];
@@ -430,7 +455,7 @@ class GeoDaProxy {
     const sources = [];
 
     for (let i=0; i<numobs; ++i) {
-      const nbrs = this.get_neighbors(map_uid, w, i);
+      const nbrs = this.get_neighbors(weights, i);
       for (let j=0; j<nbrs.length; ++j) {
         const nn = nbrs[j];
         // add point at arc source
@@ -457,6 +482,10 @@ class GeoDaProxy {
     return {arcs, targets, sources};
   }
 
+  isInt(n) {
+    return Number(n) === n && n % 1 === 0;
+  }
+  
   parseVecInt(vi) {
     let result = [];
     for (let j = 0; j < vi.size(); ++j) {
@@ -596,10 +625,6 @@ class GeoDaProxy {
     return this.parseVecDouble(brks);
   }
 
-  isInt(n) {
-    return Number(n) === n && n % 1 === 0;
-  }
-
   custom_breaks(map_uid, break_name, values, k) {
     var breaks = []; 
     if (break_name === 'natural_breaks') {
@@ -655,6 +680,93 @@ class GeoDaProxy {
       'breaks': orig_breaks,
       'id_array': id_array
     }
+  }
+
+  /**
+   *  
+   * @param {Array} event_values 
+   * @param {Array} base_values 
+   * @returns {Array}
+   */
+  excess_risk(event_values, base_values) {
+    const r = this.wasm.excess_risk(this.toVecDouble(event_values), this.toVecDouble(base_values));
+    return this.parseVecDouble(r);
+  }
+
+  /**
+   *  
+   * @param {Array} event_values 
+   * @param {Array} base_values 
+   * @returns {Array}
+   */
+  eb_risk(event_values, base_values) {
+    const r = this.wasm.excess_risk(this.toVecDouble(event_values), this.toVecDouble(base_values));
+    return this.parseVecDouble(r);
+  }
+
+  /**
+   *  
+   * @param {Array} event_values 
+   * @param {Array} base_values 
+   * @returns {Array}
+   */
+  eb_risk(event_values, base_values) {
+    const r = this.wasm.eb_risk(this.toVecDouble(event_values), this.toVecDouble(base_values));
+    return this.parseVecDouble(r);
+  }
+
+  /**
+   * 
+   * @param {WeightsResult} weights The weights object {@link WeightsResult} 
+   * @param {Array} values 
+   * @param {Boolean} is_binary 
+   * @param {Boolean} row_standardize 
+   * @param {Bollean} include_diagonal 
+   * @returns {Array}
+   */
+  spatial_lag(weights, values, is_binary, row_standardize, include_diagonal) {
+    const map_uid = weights.get_map_uid();
+    const w_uid = weights.get_uid();
+    const data = this.toVecDouble(values);
+
+    if (!is_binary) is_binary = true;
+    if (!row_standardize) row_standardize = true;
+    if (!include_diagonal) include_diagonal = false;
+
+    const r = this.wasm.spatial_lag(map_uid, w_uid, data, is_binary, row_standardize, include_diagonal);
+    return this.parseVecDouble(r);
+  }
+
+  /**
+   * 
+   * @param {WeightsResult} weights The weights object {@link WeightsResult} 
+   * @param {Array} event_values 
+   * @param {Array} base_values 
+   * @returns {Array}
+   * @returns 
+   */
+  spatial_rate(weights, event_values, base_values) {
+    const map_uid = weights.get_map_uid();
+    const w_uid = weights.get_uid();
+
+    const r = this.wasm.spatial_rate(this.toVecDouble(event_values), this.toVecDouble(base_values), map_uid, w_uid);
+    return this.parseVecDouble(r);
+  }
+
+  /**
+   * 
+   * @param {WeightsResult} weights The weights object {@link WeightsResult} 
+   * @param {Array} event_values 
+   * @param {Array} base_values 
+   * @returns {Array}
+   * @returns 
+   */
+  spatial_eb(weights, event_values, base_values) {
+    const map_uid = weights.get_map_uid();
+    const w_uid = weights.get_uid();
+
+    const r = this.wasm.spatial_eb(this.toVecDouble(event_values), this.toVecDouble(base_values), map_uid, w_uid);
+    return this.parseVecDouble(r);
   }
 
   /**
