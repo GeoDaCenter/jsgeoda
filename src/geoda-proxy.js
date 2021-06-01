@@ -23,6 +23,10 @@ class GeoDaProxy {
     this.geojson_maps = {};
   }
 
+  /**
+   * Generate a unique id for a Geojson map 
+   * @returns {String}
+   */
   generate_uid() {
     var result = [];
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -32,6 +36,7 @@ class GeoDaProxy {
     }
     return "map-" + result.join('');
   }
+
   //   
   /**
    * Read a geojson map from a file object in the format of ArrayBuffer.
@@ -100,12 +105,33 @@ class GeoDaProxy {
     return map_uid in this.geojson_maps;
   }
 
+  /**
+   * Get map bounds
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @returns {Array}
+   */
   get_bounds(map_uid) {
+    if (!this.has(map_uid)) {
+      console.log("map_uid is not recognized: ", map_uid);
+      return;
+    }
     const bounds = this.wasm.get_bounds(map_uid);
     return this.parseVecDouble(bounds);
   }
 
+  /**
+   * Get viewport for e.g. Deck.gl or GoogleMaps
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {Number} map_height 
+   * @param {Number} map_width 
+   * @returns {Object}
+   */
   get_viewport(map_uid, map_height, map_width) {
+    if (!this.has(map_uid)) {
+      console.log("map_uid is not recognized: ", map_uid);
+      return;
+    }
+
     const bounds = this.get_bounds(map_uid);
 
     const WORLD_DIM = { height: 256, width: 256 };
@@ -160,6 +186,10 @@ class GeoDaProxy {
    * @returns {Array} Returns an array of [x,y] coordinates (no projection applied) of the centroids.
    */
   get_centroids(map_uid) {
+    if (!this.has(map_uid)) {
+      console.log("map_uid is not recognized: ", map_uid);
+      return;
+    }
     let cc = this.wasm.get_centroids(map_uid);
     let xx = cc.get_x();
     let yy = cc.get_y();
@@ -206,6 +236,11 @@ class GeoDaProxy {
    * @returns {Array} Returns the values of a column of field. 
    */
   get_col(map_uid, col_name) {
+    if (!this.has(map_uid)) {
+      console.log("map_uid is not recognized: ", map_uid);
+      return;
+    }
+
     const is_numeric = this.wasm.is_numeric_col;
     if (is_numeric) {
       const vals = this.wasm.get_numeric_col(map_uid, col_name);
@@ -227,9 +262,13 @@ class GeoDaProxy {
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
   rook_weights(map_uid, order, include_lower_order, precision_threshold) {
-    if (!order) order = 1;
-    if (!include_lower_order) include_lower_order = false;
-    if (!precision) precision = 0.0;
+    if (!this.has(map_uid)) {
+      console.log("map_uid is not recognized: ", map_uid);
+      return;
+    }
+    if (order == null) order = 1;
+    if (include_lower_order == null) include_lower_order = false;
+    if (precision == null) precision = 0.0;
 
     let w_uid = this.wasm.rook_weights(map_uid, order, include_lower_order, precision_threshold);
     return w_uid;
@@ -244,9 +283,13 @@ class GeoDaProxy {
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
   queen_weights(map_uid, order, include_lower_order, precision) {
-    if (!order) order = 1;
-    if (!include_lower_order) include_lower_order = false;
-    if (!precision) precision = 0.0;
+    if (!this.has(map_uid)) {
+      console.log("map_uid is not recognized: ", map_uid);
+      return;
+    }
+    if (order == null) order = 1;
+    if (include_lower_order == null) include_lower_order = false;
+    if (precision == null) precision = 0.0;
 
     let w_uid = this.wasm.queen_weights(map_uid, order, include_lower_order, precision);
     return w_uid;
@@ -260,8 +303,12 @@ class GeoDaProxy {
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
   min_distthreshold(map_uid, is_arc, is_mile) {
-    if (!is_arc) is_arc = false;
-    if (!is_mile) is_mile = true;
+    if (!this.has(map_uid)) {
+      console.log("map_uid is not recognized: ", map_uid);
+      return;
+    }
+    if (is_arc == null) is_arc = false;
+    if (is_mile == null) is_mile = true;
 
     let val = this.wasm.min_distance_threshold(map_uid, is_arc, is_mile);
     return val;
@@ -278,10 +325,14 @@ class GeoDaProxy {
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
   knn_weights(map_uid, k, power, is_inverse, is_arc, is_mile) {
-    if (!power) power = 1.0;
-    if (!is_inverse) is_inverse = false;
-    if (!is_arc) is_arc = false;
-    if (!is_mile) is_mile = true;
+    if (!this.has(map_uid)) {
+      console.log("map_uid is not recognized: ", map_uid);
+      return;
+    }
+    if (power == null) power = 1.0;
+    if (is_inverse == null) is_inverse = false;
+    if (is_arc == null) is_arc = false;
+    if (is_mile == null) is_mile = true;
 
     let w = this.wasm.knn_weights(map_uid, k, power, is_inverse, is_arc, is_mile);
     return w;
@@ -298,10 +349,10 @@ class GeoDaProxy {
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
   distance_weights(map_uid, dist_thres, power, is_inverse, is_arc, is_mile) {
-    if (!power) power = 1.0;
-    if (!is_inverse) is_inverse = false;
-    if (!is_arc) is_arc = false;
-    if (!is_mile) is_mile = true;
+    if (power == null) power = 1.0;
+    if (is_inverse == null) is_inverse = false;
+    if (is_arc == null) is_arc = false;
+    if (is_mile == null) is_mile = true;
 
     let w = this.wasm.dist_weights(map_uid, dist_thres, power, is_inverse, is_arc, is_mile);
     return w;
@@ -326,11 +377,11 @@ class GeoDaProxy {
       console.log("kernel has to be one of  {'triangular', 'uniform', 'epanechnikov', 'quartic', 'gaussian'}");
       return null;
     }
-    if (!use_kernel_diagonals) use_kernel_diagonals = false;
-    if (!power) power = 1.0;
-    if (!is_inverse) is_inverse = false;
-    if (!is_arc) is_arc = false;
-    if (!is_mile) is_mile = true;
+    if (use_kernel_diagonals == null) use_kernel_diagonals = false;
+    if (power == null) power = 1.0;
+    if (is_inverse == null) is_inverse = false;
+    if (is_arc == null) is_arc = false;
+    if (is_mile == null) is_mile = true;
 
     let w = this.wasm.kernel_weights(map_uid, k, kernel, adaptive_bandwidth, use_kernel_diagonals, power, is_inverse, is_arc, is_mile);
     return w;
@@ -356,11 +407,11 @@ class GeoDaProxy {
       console.log("kernel has to be one of  {'triangular', 'uniform', 'epanechnikov', 'quartic', 'gaussian'}");
       return null;
     }
-    if (!use_kernel_diagonals) use_kernel_diagonals = false;
-    if (!power) power = 1.0;
-    if (!is_inverse) is_inverse = false;
-    if (!is_arc) is_arc = false;
-    if (!is_mile) is_mile = true;
+    if (use_kernel_diagonals == null) use_kernel_diagonals = false;
+    if (power == null) power = 1.0;
+    if (is_inverse == null) is_inverse = false;
+    if (is_arc == null) is_arc = false;
+    if (is_mile == null) is_mile = true;
 
     let w = this.wasm.kernel_bandwidth_weights(map_uid, bandwidth, kernel, use_kernel_diagonals, power, is_inverse, is_arc, is_mile);
     return w;
@@ -729,9 +780,9 @@ class GeoDaProxy {
     const w_uid = weights.get_uid();
     const data = this.toVecDouble(values);
 
-    if (!is_binary) is_binary = true;
-    if (!row_standardize) row_standardize = true;
-    if (!include_diagonal) include_diagonal = false;
+    if (is_binary == null) is_binary = true;
+    if (row_standardize == null) row_standardize = true;
+    if (include_diagonal == null) include_diagonal = false;
 
     const r = this.wasm.spatial_lag(map_uid, w_uid, data, is_binary, row_standardize, include_diagonal);
     return this.parseVecDouble(r);
