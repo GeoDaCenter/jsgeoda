@@ -8,8 +8,8 @@ test('Test CreateRookWeights()', async(assert) => {
     try {
       const geoda = await jsgeoda.New();
       let ab = fs.readFileSync(NAT_SHP).buffer;
-      let map_uid = geoda.ReadGeojsonMap('natregimes', ab);
-      let w = geoda.CreateRookWeights(map_uid, 1, false, 0);
+      let map_uid = geoda.read_geojson('natregimes', ab);
+      let w = geoda.createRookWeights(map_uid, 1, false, 0);
       let w_uid = w.get_uid();
       assert.equal(w_uid, "w_rooknatregimes100");
       assert.end();

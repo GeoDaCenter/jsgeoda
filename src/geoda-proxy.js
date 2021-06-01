@@ -23,6 +23,15 @@ class GeoDaProxy {
     this.geojson_maps = {};
   }
 
+  generate_uid() {
+    var result = [];
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (let i = 0; i < 12; i++) {
+      result.push(characters.charAt(Math.floor(Math.random() *  charactersLength)));
+    }
+    return "map-" + result.join('');
+  }
   //   
   /**
    * Read a geojson map from a file object in the format of ArrayBuffer.
@@ -35,13 +44,15 @@ class GeoDaProxy {
    * const geoda = await jsgeoda.New();
    * 
    * let ab = fs.readFileSync("NAT.geojson").buffer;
-   * let nat = geoda.read_geojson("NAT", ab);
+   * let nat = geoda.read_geojson(ab);
    * let num_obs = geoda.get_numobs(nat);
    * 
    * @param {String} map_uid A unique string that represent the geojson map. E.g. the geojson file name.
    * @param {ArrayBuffer} ab The content of the geojson file in format of ArrayBuffer.
    */
-  read_geojson(map_uid, ab) {
+  read_geojson(ab) {
+    const map_uid = this.generate_uid();
+
     //evt.target.result is an ArrayBuffer. In js, 
     const uint8_t_arr = new Uint8Array(ab);
     //First we need to allocate the wasm memory. 
@@ -58,6 +69,7 @@ class GeoDaProxy {
     // store the map and map type
     let map_type = this.wasm.get_map_type(map_uid);
     this.geojson_maps[map_uid] = map_type;
+
     return map_uid;
   }
 
@@ -86,6 +98,48 @@ class GeoDaProxy {
    */
   has(map_uid) {
     return map_uid in this.geojson_maps;
+  }
+
+  get_bounds(map_uid) {
+    const bounds = this.wasm.get_bounds(map_uid);
+    return this.parseVecDouble(bounds);
+  }
+
+  get_viewport(map_uid, map_height, map_width) {
+    const bounds = this.get_bounds(map_uid);
+
+    const WORLD_DIM = { height: 256, width: 256 };
+    const ZOOM_MAX = 21;
+
+    function latRad(lat) {
+        var sin = Math.sin(lat * Math.PI / 180);
+        var radX2 = Math.log((1 + sin) / (1 - sin)) / 2;
+        return Math.max(Math.min(radX2, Math.PI), -Math.PI) / 2;
+    }
+
+    function zoom(mapPx, worldPx, fraction) {
+        return Math.floor(Math.log(mapPx / worldPx / fraction) / Math.LN2);
+    }
+
+    const ne = {'lng': bounds[1], 'lat' : bounds[2] };//.getNorthEast();
+    const sw = {'lng': bounds[0], 'lat': bounds[3]};//.getSouthWest();
+
+    const latFraction = Math.abs(latRad(ne.lat) - latRad(sw.lat)) / Math.PI;
+
+    const lngDiff = ne.lng - sw.lng;
+    const lngFraction = ((lngDiff < 0) ? (lngDiff + 360) : lngDiff) / 360;
+
+    const map_dim = Math.min(map_height, map_width);
+    const latZoom = zoom(map_dim, WORLD_DIM.height, latFraction);
+    const lngZoom = zoom(map_dim, WORLD_DIM.width, lngFraction);
+
+    const z = Math.min(latZoom, lngZoom, ZOOM_MAX);
+
+    return {
+      'longitude': (bounds[0]  + bounds[1])/2.0,
+      'latitude': (bounds[2] + bounds[3]) /2.0,
+      'zoom': z -1
+    }
   }
 
   /**
@@ -162,6 +216,8 @@ class GeoDaProxy {
     }
   }
 
+  
+
   /**
    * Create a Rook contiguity weights.
    * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
@@ -170,7 +226,11 @@ class GeoDaProxy {
    * @param {Number} precision_threshold Used when the precision of the underlying shape file is insufficient to allow for an exact match of coordinates to determine which polygons are neighbors. 
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
-  createRookWeights(map_uid, order, include_lower_order, precision_threshold) {
+  rook_weights(map_uid, order, include_lower_order, precision_threshold) {
+    if (!order) order = 1;
+    if (!include_lower_order) include_lower_order = false;
+    if (!precision) precision = 0.0;
+
     let w_uid = this.wasm.rook_weights(map_uid, order, include_lower_order, precision_threshold);
     return w_uid;
   }
@@ -183,7 +243,11 @@ class GeoDaProxy {
    * @param {Number} precision_threshold Used when the precision of the underlying shape file is insufficient to allow for an exact match of coordinates to determine which polygons are neighbors. 
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
-  createQueenWeights(map_uid, order, include_lower_order, precision) {
+  queen_weights(map_uid, order, include_lower_order, precision) {
+    if (!order) order = 1;
+    if (!include_lower_order) include_lower_order = false;
+    if (!precision) precision = 0.0;
+
     let w_uid = this.wasm.queen_weights(map_uid, order, include_lower_order, precision);
     return w_uid;
   }
@@ -195,7 +259,10 @@ class GeoDaProxy {
    * @param {Boolean} is_mile A bool flag indicates if the distance unit is mile (true) or km (false). 
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
-  getMinDistThreshold(map_uid, is_arc, is_mile) {
+  min_distthreshold(map_uid, is_arc, is_mile) {
+    if (!is_arc) is_arc = false;
+    if (!is_mile) is_mile = true;
+
     let val = this.wasm.min_distance_threshold(map_uid, is_arc, is_mile);
     return val;
   }
@@ -210,7 +277,12 @@ class GeoDaProxy {
    * @param {Boolean} is_mile A bool flag indicates if the distance unit is mile (true) or km (false). 
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
-  createKnnWeights(map_uid, k, power, is_inverse, is_arc, is_mile) {
+  knn_weights(map_uid, k, power, is_inverse, is_arc, is_mile) {
+    if (!power) power = 1.0;
+    if (!is_inverse) is_inverse = false;
+    if (!is_arc) is_arc = false;
+    if (!is_mile) is_mile = true;
+
     let w = this.wasm.knn_weights(map_uid, k, power, is_inverse, is_arc, is_mile);
     return w;
   }
@@ -225,7 +297,12 @@ class GeoDaProxy {
    * @param {Boolean} is_mile A bool flag indicates if the distance unit is mile (true) or km (false). 
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
-  createDistWeights(map_uid, dist_thres, power, is_inverse, is_arc, is_mile) {
+  distance_weights(map_uid, dist_thres, power, is_inverse, is_arc, is_mile) {
+    if (!power) power = 1.0;
+    if (!is_inverse) is_inverse = false;
+    if (!is_arc) is_arc = false;
+    if (!is_mile) is_mile = true;
+
     let w = this.wasm.dist_weights(map_uid, dist_thres, power, is_inverse, is_arc, is_mile);
     return w;
   }
@@ -238,17 +315,39 @@ class GeoDaProxy {
    * @param {String} kernel The name of the kernel function, which could be one of the following: * triangular * uniform * quadratic * epanechnikov * quartic * gaussian
    * @param {Boolean} adaptive_bandwidth A bool flag indicates whether to use adaptive bandwidth or the max distance of all observation to their k-nearest neighbors. 
    * @param {Boolean} use_kernel_diagonals A bool flag indicates whether or not the lower order neighbors should be included in the weights structure.
+   * @param {Number} power  The power (or exponent) indicates how many times to use the number in a multiplication.
+   * @param {Boolean} is_inverse A bool flag indicates whether or not to apply inverse on distance value.
    * @param {Boolean} is_arc  A bool flag indicates if compute arc distance (true) or Euclidean distance (false).
    * @param {Boolean} is_mile A bool flag indicates if the distance unit is mile (true) or km (false). 
    * @returns {Object} An instance of {@link GeoDaWeights}
    */
-  createKernelWeights(map_uid, k, kernel, adaptive_bandwidth, use_kernel_diagonals, is_arc, is_mile) {
-    let w = this.wasm.kernel_weights(map_uid, k, kernel, adaptive_bandwidth, use_kernel_diagonals, is_arc, is_mile);
+  kernel_knn_weights(map_uid, k, kernel, adaptive_bandwidth, use_kernel_diagonals, power, is_inverse, is_arc, is_mile) {
+    if (!(kernel in  {'triangular':true, 'uniform':true, 'epanechnikov':true, 'quartic':true, 'gaussian':true})) {
+      console.log("kernel has to be one of  {'triangular', 'uniform', 'epanechnikov', 'quartic', 'gaussian'}");
+      return null;
+    }
+    if (!use_kernel_diagonals) use_kernel_diagonals = false;
+    if (!power) power = 1.0;
+    if (!is_inverse) is_inverse = false;
+    if (!is_arc) is_arc = false;
+    if (!is_mile) is_mile = true;
+
+    let w = this.wasm.kernel_weights(map_uid, k, kernel, adaptive_bandwidth, use_kernel_diagonals, power, is_inverse, is_arc, is_mile);
     return w;
   }
 
-  createKernelBandwidthWeights(map_uid, dist_thres, kernel, use_kernel_diagonals, is_arc, is_mile) {
-    let w = this.wasm.kernel_bandwidth_weights(map_uid, dist_thres, kernel, use_kernel_diagonals, is_arc, is_mile);
+  kernel_weights(map_uid, dist_thres, kernel, use_kernel_diagonals, power, is_inverse, is_arc, is_mile) {
+    if (!(kernel in  {'triangular':true, 'uniform':true, 'epanechnikov':true, 'quartic':true, 'gaussian':true})) {
+      console.log("kernel has to be one of  {'triangular', 'uniform', 'epanechnikov', 'quartic', 'gaussian'}");
+      return null;
+    }
+    if (!use_kernel_diagonals) use_kernel_diagonals = false;
+    if (!power) power = 1.0;
+    if (!is_inverse) is_inverse = false;
+    if (!is_arc) is_arc = false;
+    if (!is_mile) is_mile = true;
+
+    let w = this.wasm.kernel_bandwidth_weights(map_uid, dist_thres, kernel, use_kernel_diagonals, power, is_inverse, is_arc, is_mile);
     return w;
   }
 
@@ -315,12 +414,47 @@ class GeoDaProxy {
   /**
    * Get neighbors (indices) of an observation.
    * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
-   * @param {String} weight_uid A unique string represents the created weights.
+   * @param {String} w A created weights object.
    * @param {Number} idx An integer number represents the index of which observation to get its neighbors.
    */
-  GetNeighbors(map_uid, weight_uid, idx) {
-    let nbrs = this.wasm.get_neighbors(map_uid, weight_uid, idx);
+  get_neighbors(map_uid, w, idx) {
+    let nbrs = this.wasm.get_neighbors(map_uid, w.get_uid(), idx);
     return this.parseVecInt(nbrs);
+  }
+
+  get_connectivity(map_uid, w) {
+    const centroids = this.get_centroids(map_uid);
+    const numobs = this.get_numobs(map_uid);
+    const arcs = [];
+    const targets = [];
+    const sources = [];
+
+    for (let i=0; i<numobs; ++i) {
+      const nbrs = this.get_neighbors(map_uid, w, i);
+      for (let j=0; j<nbrs.length; ++j) {
+        const nn = nbrs[j];
+        // add point at arc source
+        sources.push({
+          position: centroids[nn],
+          target: centroids[i],
+          name: String(j),
+          radius: 1,
+          gain: 0
+        });
+        // add arc
+        arcs.push({
+          target: centroids[i],
+          source: centroids[nn],
+          value: 3
+        })
+      }
+      // add point at arc target
+      targets.push({
+        position: centroids[i],
+        name: String(i),
+      });
+    }
+    return {arcs, targets, sources};
   }
 
   parseVecInt(vi) {
@@ -361,6 +495,14 @@ class GeoDaProxy {
     return vs;
   }
 
+  toVecInt(input) {
+    let vs = new this.wasm.VectorInt();
+    for (let i = 0; i < input.length; ++i) {
+      vs.push_back(input[i]);
+    }
+    return vs;
+  }
+
   toVecDouble(input) {
     let vs = new this.wasm.VectorDouble();
     for (let i = 0; i < input.length; ++i) {
@@ -388,71 +530,94 @@ class GeoDaProxy {
 
   /**
    * Get natural breaks from the values.
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
    * @param {Number} k Number of breaks
    * @param {Array} values The values that the classify algorithm will be applied on.
    * @returns {Array} Returns an array of break point values.
    */
-  natural_breaks(map_uid, k, values) {
-    return this.custom_breaks(map_uid, "natural_breaks", k, null, values);
+  natural_breaks(k, values) {
+    const undefs = values.map( v => isNaN(v) );
+    const brks = this.wasm.natural_breaks(k, this.toVecDouble(values), this.toVecInt(undefs));
+    return this.parseVecDouble(brks);
   }
 
   /**
    * Get quantile breaks from the values.
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
    * @param {Number} k Number of breaks
    * @param {Array} values The values that the classify algorithm will be applied on.
    * @returns {Array} Returns an array of break point values.
    */
-  quantile_breaks(map_uid, k, values) {
-    return this.custom_breaks(map_uid, "quantile_breaks", k, null, values);
+  quantile_breaks(k, values) {
+    const undefs = values.map( v => isNaN(v) );
+    const brks = this.wasm.quantile_breaks(k, this.toVecDouble(values), this.toVecInt(undefs));
+    return this.parseVecDouble(brks);
+  }
+
+   /**
+   * Get Percentile breaks from the values.
+   * @param {Array} values The values that the classify algorithm will be applied on.
+   * @returns {Array} Returns an array of break point values.
+   */
+  percentile_breaks(values) {
+    const undefs = values.map( v => isNaN(v) );
+    const brks = this.wasm.percentile_breaks(this.toVecDouble(values), this.toVecInt(undefs));
+    return this.parseVecDouble(brks);
   }
 
    /**
    * Get Standard deviation breaks from the values.
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
-   * @param {Number} k Number of breaks
    * @param {Array} values The values that the classify algorithm will be applied on.
    * @returns {Array} Returns an array of break point values.
    */
-  stddev_breaks(map_uid, k, values) {
-    return this.custom_breaks(map_uid, "stddev_breaks", k, null, values);
+  stddev_breaks(values) {
+    const undefs = values.map( v => isNaN(v) );
+    const brks = this.wasm.stddev_breaks(this.toVecDouble(values), this.toVecInt(undefs));
+    return this.parseVecDouble(brks);
   }
 
   /**
    * Get breaks of boxplot (hinge=1.5) including the top, bottom, median, and two quartiles of the data
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
-   * @param {Number} k Number of breaks
    * @param {Array} values The values that the classify algorithm will be applied on.
    * @returns {Array} Returns an array of break point values.
    */
-  hinge15_breaks(map_uid, k, values) {
-    return this.custom_breaks(map_uid, "hinge15_breaks", k, null, values);
+  hinge15_breaks(values) {
+    const undefs = values.map( v => isNaN(v) );
+    const brks = this.wasm.hinge15_breaks(this.toVecDouble(values), this.toVecInt(undefs));
+    return this.parseVecDouble(brks);
   }
 
   /**
    * Get breaks of boxplot (hinge=3.0) including the top, bottom, median, and two quartiles of the data
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
-   * @param {Number} k Number of breaks
    * @param {Array} values The values that the classify algorithm will be applied on.
    * @returns {Array} Returns an array of break point values.
    */
-  hinge30_breaks(map_uid, k, values) {
-    return this.custom_breaks(map_uid, "hinge30_breaks", k, null, values);
+  hinge30_breaks(values) {
+    const undefs = values.map( v => isNaN(v) );
+    const brks = this.wasm.hinge30_breaks(this.toVecDouble(values), this.toVecInt(undefs));
+    return this.parseVecDouble(brks);
   }
 
   isInt(n) {
     return Number(n) === n && n % 1 === 0;
   }
 
-  custom_breaks(map_uid, break_name, k, sel_field, values) {
-    var breaks_vec;
-    if (sel_field == null) {
-      breaks_vec = this.wasm.custom_breaks1(map_uid, k, break_name, this.toVecDouble(values));
-    } else {
-      breaks_vec = this.wasm.custom_breaks(map_uid, k, sel_field, break_name);
+  custom_breaks(map_uid, break_name, values, k) {
+    var breaks = []; 
+    if (break_name === 'natural_breaks') {
+      breaks = this.natural_breaks(k, values);
+    } else if (break_name === 'quantile_breaks') {
+      breaks = this.quantile_breaks(k, values);
+    } else if (break_name === 'percentile_breaks') {
+      breaks = this.percentile_breaks(values);
+    } else if (break_name === 'stddev_breaks') {
+      breaks = this.stddev_breaks(values);
+    } else if (break_name === 'hinge15_breaks') {
+      breaks = this.hinge15_breaks(values);
+    } else if (break_name === 'hinge30_breaks') {
+      breaks = this.hinge30_breaks(values);
+    } else  {
+      console.log("break name is not valid.");
+      return;
     }
-    let breaks = this.parseVecDouble(breaks_vec);
     var orig_breaks = breaks;
 
     let bins = [];
@@ -482,10 +647,6 @@ class GeoDaProxy {
           break;
         }
       }
-    }
-
-    for (let i = 0; i < bins.length; ++i) {
-      //bins[i] += " (" + id_array[i].length + ')';
     }
 
     return {
