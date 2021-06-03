@@ -11,7 +11,7 @@ function New() {
   return new Promise((res, rej) => {
     jsgeoda().then(wasm=>{
       jsgeoda_wasm = wasm;
-      let geoda_proxy = new GeoDaProxy.GeoDaProxy(wasm);
+      let geoda_proxy = new GeoDaProxy(wasm);
       res(geoda_proxy);
     });
   });

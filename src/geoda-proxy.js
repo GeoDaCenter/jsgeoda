@@ -2,6 +2,8 @@
 // date: 10/7/2020 version 0.0.4
 // date: 5/14/2021 version 0.0.8
 
+import GeoDaLisa from './geoda-lisa.js';
+
 /**
  * Use jsgeoda.New() to get an instance of GeoDaProxy. See New() {@link New}
  * @see New
@@ -9,7 +11,7 @@
  * @classdesc GeoDaProxy is a class that wraps all the APIs of libgeoda WASM.
  * Always use jsgeoda.{@link New}() to get an instance of GeoDaProxy.
  */
-class GeoDaProxy {
+export default class GeoDaProxy {
 
   /**
    * Should not be called directy. 
@@ -417,66 +419,6 @@ class GeoDaProxy {
     return w;
   }
 
-  //local_moran(map_uid, weight_uid, col_name) {
-  //  return this.wasm.local_moran(map_uid, weight_uid, col_name);
-  //}
-
-  /**
-   * Apply local Moran statistics with 999 permutations, which can not be changed in v0.0.4
-   * @param {String} weights The weights object {@link WeightsResult} 
-   * @param {Array} values The values that local moran statistics will be applied on.
-   * @returns {Object} An instance of {@link LisaResult}
-   */
-  local_moran(weights, values) {
-    const map_uid = weights.get_map_uid();
-    const weight_uid = weights.get_uid();
-    return this.wasm.local_moran(map_uid, weight_uid, this.toVecDouble(values));
-  }
-
-  /**
-   * Apply local G statistics with 999 permutations, which can not be changed in v0.0.4
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
-   * @param {String} weight_uid A unique string represents the created weights.
-   * @param {Array} values The values that local statistics will be applied on.
-   * @returns {Object} An instance of {@link LisaResult}
-   */
-  local_g(map_uid, weight_uid, col_name) {
-    return this.wasm.local_g(map_uid, weight_uid, col_name);
-  }
-
-  /**
-   * Apply local G* statistics with 999 permutations, which can not be changed in v0.0.4
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
-   * @param {String} weight_uid A unique string represents the created weights.
-   * @param {Array} values The values that local statistics will be applied on.
-   * @returns {Object} An instance of {@link LisaResult}
-   */
-  local_gstar(map_uid, weight_uid, col_name) {
-    return this.wasm.local_gstar(map_uid, weight_uid, col_name);
-  }
-
-  /**
-   * Apply local Geary statistics with 999 permutations, which can not be changed in v0.0.4
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
-   * @param {String} weight_uid A unique string represents the created weights.
-   * @param {Array} values The values that local statistics will be applied on.
-   * @returns {Object} An instance of {@link LisaResult}
-   */
-  local_geary(map_uid, weight_uid, col_name) {
-    return this.wasm.local_geary(map_uid, weight_uid, col_name);
-  }
-
-  /**
-   * Apply local Join Count statistics with 999 permutations, which can not be changed in v0.0.4
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
-   * @param {String} weight_uid A unique string represents the created weights.
-   * @param {Array} values The values that local statistics will be applied on.
-   * @returns {Object} An instance of {@link LisaResult}
-   */
-  local_joincount(map_uid, weight_uid, col_name) {
-    return this.wasm.local_joincount(map_uid, weight_uid, col_name);
-  }
-
   /**
    * Get neighbors (indices) of an observation.
    * @param {String} weights The weights object {@link WeightsResult} 
@@ -558,6 +500,19 @@ class GeoDaProxy {
     return result;
   }
 
+  parseVecVecDouble(vvd) {
+    let result = [];
+    for (let i = 0; i < vvd.size(); ++i) {
+      let sub = [];
+      let vd = vvd.get(i);
+      for (let j = 0; j < vd.size(); ++j) {
+        sub.push(vd.get(j));
+      }
+      result.push(sub);
+    }
+    return result;
+  }
+
   parseVecDouble(vd) {
     let result = []
     for (let i = 0; i < vd.size(); ++i) {
@@ -566,6 +521,13 @@ class GeoDaProxy {
     return result;
   }
 
+  parseVecString(vd) {
+    let result = []
+    for (let i = 0; i < vd.size(); ++i) {
+      result.push(vd.get(i));
+    }
+    return result;
+  }
 
   toVecString(input) {
     let vs = new this.wasm.VectorString();
@@ -592,6 +554,29 @@ class GeoDaProxy {
         vs.push_back(input[i]);
     }
     return vs;
+  }
+
+  toVecVecDouble(input) {
+    let vvs = new this.wasm.VecVecDouble();
+    let iis = new this.wasm.VecVecInt();
+
+    for (let i = 0; i < input.length; ++i) {
+      let vs = new this.wasm.VectorDouble();
+      let is = new this.wasm.VectorInt();
+
+      for (let j=0; j < input[i].length; ++j) {
+        if (isNaN(input[i][j]) || input[i][j] == Infinity) {
+          vs.push_back(0);
+          is.push_back(1);
+        } else {
+          vs.push_back(input[i][j]);
+          is.push_back(0);
+        }
+      }
+      vvs.push_back(vs);
+      iis.push_back(is);
+    }
+    return {"values": vvs, "undefs": iis};
   }
 
   redcap(map_uid, weight_uid, k, sel_fields, bound_var, min_bound, method) {
@@ -867,6 +852,322 @@ class GeoDaProxy {
     }
     return result;
   }
-}
 
-exports["GeoDaProxy"] = GeoDaProxy;
+
+  /**
+   * Apply local Moran statistics 
+   * @param {String} weights The weights object {@link WeightsResult} 
+   * @param {Array} values The values that local moran statistics will be applied on.
+   * @param {Number} permutations the number of permutations for the LISA computation. Default: 999.
+   * @param {String} permutation_method the permutation method used for the LISA computation. Options are 'complete', 'lookup'. Default: 'lookup'.
+   * @param {Number} seed he seed for random number generator used in LISA statistics. Default: 123456789.
+   * @returns {Object} An instance of {@link LisaResult}
+   */
+  local_moran(weights, values, permutations, permutation_method, significance_cutoff, seed) {
+    return this.call_lisa("local_moran", weights, values, permutations, permutation_method, significance_cutoff, seed);
+  }
+
+  /**
+   * Apply local G statistics 
+   * @param {String} weights The weights object {@link WeightsResult} 
+   * @param {Array} values The values that local moran statistics will be applied on.
+   * @param {Number} permutations the number of permutations for the LISA computation. Default: 999.
+   * @param {String} permutation_method the permutation method used for the LISA computation. Options are 'complete', 'lookup'. Default: 'lookup'.
+   * @param {Number} seed he seed for random number generator used in LISA statistics. Default: 123456789.
+   * @returns {Object} An instance of {@link LisaResult}
+   */
+  local_g(weights, values, permutations, permutation_method, significance_cutoff, seed) {
+    return this.call_lisa("local_g", weights, values, permutations, permutation_method, significance_cutoff, seed);
+  }
+
+  /**
+   * Apply local G* statistics 
+   * @param {String} weights The weights object {@link WeightsResult} 
+   * @param {Array} values The values that local moran statistics will be applied on.
+   * @param {Number} permutations the number of permutations for the LISA computation. Default: 999.
+   * @param {String} permutation_method the permutation method used for the LISA computation. Options are 'complete', 'lookup'. Default: 'lookup'.
+   * @param {Number} seed he seed for random number generator used in LISA statistics. Default: 123456789.
+   * @returns {Object} An instance of {@link LisaResult}
+   */
+  local_gstar(weights, values, permutations, permutation_method, significance_cutoff, seed) {
+    return this.call_lisa("local_gstar", weights, values, permutations, permutation_method, significance_cutoff, seed);
+  }
+  /**
+   * Apply local Geary statistics 
+   * @param {String} weights The weights object {@link WeightsResult} 
+   * @param {Array} values The values that local moran statistics will be applied on.
+   * @param {Number} permutations the number of permutations for the LISA computation. Default: 999.
+   * @param {String} permutation_method the permutation method used for the LISA computation. Options are 'complete', 'lookup'. Default: 'lookup'.
+   * @param {Number} seed he seed for random number generator used in LISA statistics. Default: 123456789.
+   * @returns {Object} An instance of {@link LisaResult}
+   */
+  local_geary(weights, values, permutations, permutation_method, significance_cutoff, seed) {
+    return this.call_lisa("local_geary", weights, values, permutations, permutation_method, significance_cutoff, seed);
+  }
+  /**
+   * Apply local Join Count statistics 
+   * @param {String} weights The weights object {@link WeightsResult} 
+   * @param {Array} values The values that local moran statistics will be applied on.
+   * @param {Number} permutations the number of permutations for the LISA computation. Default: 999.
+   * @param {String} permutation_method the permutation method used for the LISA computation. Options are 'complete', 'lookup'. Default: 'lookup'.
+   * @param {Number} seed he seed for random number generator used in LISA statistics. Default: 123456789.
+   * @returns {Object} An instance of {@link LisaResult}
+   */
+  local_joincount(weights, values, permutations, permutation_method, significance_cutoff, seed) {
+    return this.call_lisa("local_joincount", weights, values, permutations, permutation_method, significance_cutoff, seed);
+  }
+  /**
+   * Apply Quantile LISA statistics 
+   * @param {String} weights The weights object {@link WeightsResult} 
+   * @param {Array} values The values that local moran statistics will be applied on.
+   * @param {Number} permutations the number of permutations for the LISA computation. Default: 999.
+   * @param {String} permutation_method the permutation method used for the LISA computation. Options are 'complete', 'lookup'. Default: 'lookup'.
+   * @param {Number} seed he seed for random number generator used in LISA statistics. Default: 123456789.
+   * @returns {Object} An instance of {@link LisaResult}
+   */
+  quantile_lisa(weights, k , quantile, values, permutations, permutation_method, significance_cutoff, seed) {
+    const map_uid = weights.get_map_uid();
+    const weight_uid = weights.get_uid();
+
+    if (permutations == null) permutations = 999;
+    if (permutation_method == null) permutation_method = "lookup";
+    if (significance_cutoff == null) significance_cutoff = 0.05;
+    if (seed == null) seed = 123456789;
+
+    if (!(permutation_method in {'lookup':true, 'complete':true})) {
+      consolo.log("Permutation method needs to be one of {'lookup', 'complete'}.");
+      return null;
+    }
+
+    const undefs = values.map( v => isNaN(v) );
+    const undefs_b = this.toVecInt(undefs);
+    const vals = this.toVecDouble(values);
+
+    const lisa_obj = this.wasm.quantile_lisa(map_uid, weight_uid, k, quantile, vals, undefs_b, significance_cutoff, permutations, permutation_method, seed);
+    return lisa_obj != null ? new GeoDaLisa(lisa_obj, this) : null;
+  }
+
+  /**
+   * Apply LISA statistics 
+   * @param {String} weights The weights object {@link WeightsResult} 
+   * @param {Array} values The values that local moran statistics will be applied on.
+   * @param {Number} permutations the number of permutations for the LISA computation. Default: 999.
+   * @param {String} permutation_method the permutation method used for the LISA computation. Options are 'complete', 'lookup'. Default: 'lookup'.
+   * @param {Number} seed he seed for random number generator used in LISA statistics. Default: 123456789.
+   * @returns {Object} An instance of {@link LisaResult}
+   */
+  call_lisa(lisa_function, weights, values, permutations, permutation_method, significance_cutoff, seed) {
+    const map_uid = weights.get_map_uid();
+    const weight_uid = weights.get_uid();
+
+    if (permutations == null) permutations = 999;
+    if (permutation_method == null) permutation_method = "lookup";
+    if (significance_cutoff == null) significance_cutoff = 0.05;
+    if (seed == null) seed = 123456789;
+
+    if (!(permutation_method in {'lookup':true, 'complete':true})) {
+      consolo.log("Permutation method needs to be one of {'lookup', 'complete'}.");
+      return null;
+    }
+
+    const undefs = values.map( v => isNaN(v) );
+    const undefs_b = this.toVecInt(undefs);
+    const vals = this.toVecDouble(values);
+
+    let lisa_obj = null;
+    if (lisa_function === 'local_moran') {
+      lisa_obj = this.wasm.local_moran(map_uid, weight_uid, vals, undefs_b, significance_cutoff, permutations, permutation_method, seed);
+    } else if  (lisa_function === 'local_g') {
+      lisa_obj = this.wasm.local_g(map_uid, weight_uid, vals, undefs_b, significance_cutoff, permutations, permutation_method, seed);
+    } else if  (lisa_function === 'local_gstar') {
+      lisa_obj = this.wasm.local_gstar(map_uid, weight_uid, vals, undefs_b, significance_cutoff, permutations, permutation_method, seed);
+    } else if  (lisa_function === 'local_geary') {
+      lisa_obj = this.wasm.local_geary(map_uid, weight_uid, vals, undefs_b, significance_cutoff, permutations, permutation_method, seed);
+    } else if  (lisa_function === 'local_joincount') {
+      lisa_obj = this.wasm.local_joincount(map_uid, weight_uid, vals, undefs_b, significance_cutoff, permutations, permutation_method, seed);
+    } else {
+      console.log("lisa_function is not valid: ", lisa_function);
+    }
+
+    return lisa_obj != null ? new GeoDaLisa(lisa_obj, this) : null;
+  }
+
+  /**
+   * 
+   * @param {String} map_uid 
+   * @param {Number} knn 
+   * @param {Array} data 
+   * @param {String} scale_method 
+   * @param {String} distance_method 
+   * @param {Number} power 
+   * @param {Boolean} is_inverse 
+   * @param {Boolean} is_arc 
+   * @param {Boolean} is_mile 
+   * @returns {Array}
+   */
+  neighbor_match_test(map_uid, knn, data, scale_method, distance_method, power, is_inverse, is_arc, is_mile) {
+    if (scale_method == null) scale_method = 'standardize';
+    if (!(scale_method in {'raw':true, 'standardize':true, 'demean': true, 'mad': true, 'range_standardize': true, 'range_adjust': true})) {
+      console.log("The scaling method needs to be one of {'raw', 'standardize', 'demean', 'mad', 'range_standardize', 'range_adjust'}.");
+      return null;
+    }
+    if (distance_method == null) distance_method = 'euclidean';
+    if (!(distance_method in {'euclidean': true, 'manhattan': true})) {
+      console.log("The distance method needs to be one of {'euclidean', 'manhattan'}.");
+      return null;
+    }
+    if (power == null) power = 1.0;
+    if (is_inverse == null) is_inverse = false;
+    if (is_arc == null) is_arc = false;
+    if (is_mile == null) is_mile = true;
+
+    const in_data = this.toVecVecDouble(data);
+    const r = this.wasm.neighbor_match_test(map_uid, knn,  power, is_inverse, is_arc, is_mile, in_data['values'], scale_method, distance_method);
+    const rr = this.parseVecVecDouble(r);
+
+    return {
+      'cardinality' : rr[0],
+      'probability' : rr[1]
+    }
+  }
+
+  local_multigeary(weights, values, permutations, permutation_method, significance_cutoff, seed) {
+    const map_uid = weights.get_map_uid();
+    const weight_uid = weights.get_uid();
+
+    if (permutations == null) permutations = 999;
+    if (permutation_method == null) permutation_method = "lookup";
+    if (significance_cutoff == null) significance_cutoff = 0.05;
+    if (seed == null) seed = 123456789;
+
+    if (!(permutation_method in {'lookup':true, 'complete':true})) {
+      consolo.log("Permutation method needs to be one of {'lookup', 'complete'}.");
+      return null;
+    }
+
+    const data = this.toVecVecDouble(values);
+    const lisa_obj = this.wasm.local_multigeary(map_uid, weight_uid, data['values'], data['undefs'], significance_cutoff, permutations, permutation_method, seed);
+
+    return lisa_obj != null ? new GeoDaLisa(lisa_obj, this) : null;
+  }
+
+  local_bijoincount(weights, values1,  values2, permutations, permutation_method, significance_cutoff, seed) {
+    const map_uid = weights.get_map_uid();
+    const weight_uid = weights.get_uid();
+
+    if (permutations == null) permutations = 999;
+    if (permutation_method == null) permutation_method = "lookup";
+    if (significance_cutoff == null) significance_cutoff = 0.05;
+    if (seed == null) seed = 123456789;
+
+    if (!(permutation_method in {'lookup':true, 'complete':true})) {
+      consolo.log("Permutation method needs to be one of {'lookup', 'complete'}.");
+      return null;
+    }
+
+    const num_obs = values1.length;
+    for (let i=0; i<num_obs; ++i) {
+      if ((values1[i] != 0 && values1[i] != 1) || (values2[i] != 0 && values2[i] != 1)) {
+        console.log("The input data is not binary.");
+        return null;
+      }
+    }
+
+    for (let i=0; i<num_obs; ++i) {
+      if (values1[i] == 1 && values2[i] == 1) {
+        console.log("The bivariate local join count only applies on two variables with no-colocation.");
+        return null;
+      }
+    }
+
+    const data = this.toVecVecDouble([values1, values2]);
+    const lisa_obj = this.wasm.local_multigeary(map_uid, weight_uid, data['values'], data['undefs'], significance_cutoff, permutations, permutation_method, seed);
+
+    return lisa_obj != null ? new GeoDaLisa(lisa_obj, this) : null;
+  }
+
+  local_multijoincount(weights, values, permutations, permutation_method, significance_cutoff, seed) {
+    const map_uid = weights.get_map_uid();
+    const weight_uid = weights.get_uid();
+
+    if (permutations == null) permutations = 999;
+    if (permutation_method == null) permutation_method = "lookup";
+    if (significance_cutoff == null) significance_cutoff = 0.05;
+    if (seed == null) seed = 123456789;
+
+    if (!(permutation_method in {'lookup':true, 'complete':true})) {
+      consolo.log("Permutation method needs to be one of {'lookup', 'complete'}.");
+      return null;
+    }
+
+    const num_vars = values.length;
+    if (num_vars) {
+      console.log("The input data is not from multivariate variables.");
+      return;
+    }
+
+    const num_obs = values[0].length;
+    for (let i=0; i<num_vars; ++i) {
+      for (let j=0; j< num_obs; ++j) {
+        if (values[i][j] != 0 && values[i][j] != 1) {
+          console.log("The input data is not binary.");
+          return null;
+        }
+      }
+    }
+
+    if (num_vars == 2) {
+      for (let i=0; i<num_obs; ++i) {
+        if (values[0][i] == 1 && values[1][i] == 1) {
+          console.log("The input two variables have no colocations. Please use: local_bijoincount().");
+          return null;
+        }
+      } 
+    }
+
+    const data = this.toVecVecDouble(values);
+    const lisa_obj = this.wasm.local_multigeary(map_uid, weight_uid, data['values'], data['undefs'], significance_cutoff, permutations, permutation_method, seed);
+
+    return lisa_obj != null ? new GeoDaLisa(lisa_obj, this) : null;
+  }
+
+  /**
+   * 
+   * @param {Object} weights 
+   * @param {Array} ks 
+   * @param {Array} quantiles 
+   * @param {Array} values 
+   * @param {Number} permutations 
+   * @param {String} permutation_method 
+   * @param {Number} significance_cutoff 
+   * @param {Number} seed 
+   * @returns 
+   */
+  multi_quantile_lisa(weights, ks, quantiles, values, permutations, permutation_method, significance_cutoff, seed) {
+    const map_uid = weights.get_map_uid();
+    const weight_uid = weights.get_uid();
+
+    if (permutations == null) permutations = 999;
+    if (permutation_method == null) permutation_method = "lookup";
+    if (significance_cutoff == null) significance_cutoff = 0.05;
+    if (seed == null) seed = 123456789;
+
+    if (!(permutation_method in {'lookup':true, 'complete':true})) {
+      consolo.log("Permutation method needs to be one of {'lookup', 'complete'}.");
+      return null;
+    }
+
+    const num_vars = values.length;
+    if (num_vars != ks.length || num_vars != quantiles.length) {
+      console.log("The data size of ks, quantiles and values are not the same.");
+      return;
+    }
+
+    const in_ks = this.toVecInt(ks);
+    const in_quantiles = this.toVecInt(quantiles);
+    const data = this.toVecVecDouble(values);
+
+    const lisa_obj = this.wasm.multi_quantile_lisa(map_uid, weight_uid, in_ks, in_quantiles, data['values'], data['undefs'], significance_cutoff, permutations, permutation_method, seed);
+    return lisa_obj != null ? new GeoDaLisa(lisa_obj, this) : null;
+  }
+}
