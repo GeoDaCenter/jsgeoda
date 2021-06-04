@@ -343,7 +343,7 @@ export default class GeoDaProxy {
   /**
    * Create a Distance-based weights.
    * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
-   * @param {Number} dist_thres A positive numeric value of distance threshold used to find neighbors. For example, one can use the pygeoda.weights.min_threshold() to get a distance that guarantees that every observation has at least 1 neighbor.
+   * @param {Number} dist_thres A positive numeric value of distance threshold used to find neighbors. 
    * @param {Number} power  The power (or exponent) indicates how many times to use the number in a multiplication.
    * @param {Boolean} is_inverse A bool flag indicates whether or not to apply inverse on distance value.
    * @param {Boolean} is_arc  A bool flag indicates if compute arc distance (true) or Euclidean distance (false).
@@ -1321,7 +1321,8 @@ export default class GeoDaProxy {
     return this.get_clustering_result(r); 
   }
 
-  azp_greedy(weights, k, values, inits, init_region, scale_method, distance_method, min_bounds_values, min_bounds, max_bounds_values, max_bounds, seed) {
+  
+  azp_greedy(weights, k, values, inits, init_region, min_bounds_values, min_bounds, max_bounds_values, max_bounds, scale_method, distance_method,  seed) {
     if (inits == null) inits = 0;
     if (init_region == null) init_region = [];
 
@@ -1347,6 +1348,68 @@ export default class GeoDaProxy {
     if (seed == null) seed = 123456789;
     
     const r = this.wasm.azp_greedy(map_uid, w_uid, k, data['values'], inits, this.toVecInt(init_region), scale_method, distance_method, in_min_bounds_values, in_min_bounds, in_max_bounds_values, in_max_bounds, seed);
+    return this.get_clustering_result(r); 
+  }
+
+  azp_sa(weights, k, values, cooling_rate, sa_maxit, inits, init_region, min_bounds_values, min_bounds, max_bounds_values, max_bounds, scale_method, distance_method,  seed) {
+    if (cooling_rate == null) cooling_rate = 0.85;
+    if (sa_maxit == null) sa_maxit = 1;
+    if (inits == null) inits = 0;
+    if (init_region == null) init_region = [];
+
+    if (scale_method == null) scale_method = 'standardize';
+    if (distance_method == null) distance_method = 'euclidean';
+    if (!this.check_scale_method(scale_method)) return null;
+    if (!this.check_distance_method(distance_method)) return null;
+
+    const map_uid = weights.get_map_uid();
+    const w_uid = weights.get_uid();
+    const data = this.toVecVecDouble(values);
+
+    if (min_bounds_values == null) min_bounds_values = [];
+    if (min_bounds == null) min_bounds = [];
+    if (max_bounds_values == null) max_bounds_values = [];
+    if (max_bounds == null) max_bounds = [];
+
+    const in_min_bounds_values = this.toVecVecDouble(min_bounds_values)['values'];
+    const in_min_bounds= this.toVecDouble(min_bounds);
+    const in_max_bounds_values = this.toVecVecDouble(max_bounds_values)['values'];
+    const in_max_bounds = this.toVecDouble(max_bounds);
+
+    if (seed == null) seed = 123456789;
+    
+    const r = this.wasm.azp_sa(map_uid, w_uid, k, cooling_rate, sa_maxit, data['values'], inits, this.toVecInt(init_region), scale_method, distance_method, in_min_bounds_values, in_min_bounds, in_max_bounds_values, in_max_bounds, seed);
+    return this.get_clustering_result(r); 
+  }
+
+  azp_tabu(weights, k, values, tabu_length, conv_tabu, inits, init_region, min_bounds_values, min_bounds, max_bounds_values, max_bounds, scale_method, distance_method,  seed) {
+    if (tabu_length == null) tabu_length = 10;
+    if (conv_tabu == null) conv_tabu = 10;
+    if (inits == null) inits = 0;
+    if (init_region == null) init_region = [];
+
+    if (scale_method == null) scale_method = 'standardize';
+    if (distance_method == null) distance_method = 'euclidean';
+    if (!this.check_scale_method(scale_method)) return null;
+    if (!this.check_distance_method(distance_method)) return null;
+
+    const map_uid = weights.get_map_uid();
+    const w_uid = weights.get_uid();
+    const data = this.toVecVecDouble(values);
+
+    if (min_bounds_values == null) min_bounds_values = [];
+    if (min_bounds == null) min_bounds = [];
+    if (max_bounds_values == null) max_bounds_values = [];
+    if (max_bounds == null) max_bounds = [];
+
+    const in_min_bounds_values = this.toVecVecDouble(min_bounds_values)['values'];
+    const in_min_bounds= this.toVecDouble(min_bounds);
+    const in_max_bounds_values = this.toVecVecDouble(max_bounds_values)['values'];
+    const in_max_bounds = this.toVecDouble(max_bounds);
+
+    if (seed == null) seed = 123456789;
+    
+    const r = this.wasm.azp_tabu(map_uid, w_uid, k, tabu_length, conv_tabu, data['values'], inits, this.toVecInt(init_region), scale_method, distance_method, in_min_bounds_values, in_min_bounds, in_max_bounds_values, in_max_bounds, seed);
     return this.get_clustering_result(r); 
   }
 
