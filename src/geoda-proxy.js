@@ -579,19 +579,7 @@ export default class GeoDaProxy {
     return {"values": vvs, "undefs": iis};
   }
 
-  redcap(map_uid, weight_uid, k, sel_fields, bound_var, min_bound, method) {
-    let col_names = this.toVecString(sel_fields);
-    let clusters_vec = this.wasm.redcap(map_uid, weight_uid, k, col_names, bound_var, min_bound, method);
-    let clusters = this.parseVecVecInt(clusters_vec);
-    return clusters;
-  }
-
-  maxp(map_uid, weight_uid, k, sel_fields, bound_var, min_bound, method, tabu_length, cool_rate, n_iter) {
-    let col_names = this.toVecString(sel_fields);
-    let clusters_vec = this.wasm.maxp(map_uid, weight_uid, col_names, bound_var, min_bound, tabu_length, cool_rate, method, k, n_iter);
-    let clusters = this.parseVecVecInt(clusters_vec);
-    return clusters;
-  }
+  
 
   /**
    * Get natural breaks from the values.
@@ -992,6 +980,23 @@ export default class GeoDaProxy {
     return lisa_obj != null ? new GeoDaLisa(lisa_obj, this) : null;
   }
 
+  scale_methods() {
+    return {
+      'raw':true, 
+      'standardize':true, 
+      'demean': true, 
+      'mad': true, 
+      'range_standardize': true, 
+      'range_adjust': true
+    }
+  }
+
+  distance_methods() {
+    return {
+      'euclidean': true, 
+      'manhattan': true
+    }
+  }
   /**
    * 
    * @param {String} map_uid 
@@ -1007,13 +1012,16 @@ export default class GeoDaProxy {
    */
   neighbor_match_test(map_uid, knn, data, scale_method, distance_method, power, is_inverse, is_arc, is_mile) {
     if (scale_method == null) scale_method = 'standardize';
-    if (!(scale_method in {'raw':true, 'standardize':true, 'demean': true, 'mad': true, 'range_standardize': true, 'range_adjust': true})) {
-      console.log("The scaling method needs to be one of {'raw', 'standardize', 'demean', 'mad', 'range_standardize', 'range_adjust'}.");
+    const defined_scale_methods = this.scale_methods();
+    if (!(scale_method in defined_scale_methods)) {
+      console.log("The scaling method is not valid.");
       return null;
     }
+
     if (distance_method == null) distance_method = 'euclidean';
-    if (!(distance_method in {'euclidean': true, 'manhattan': true})) {
-      console.log("The distance method needs to be one of {'euclidean', 'manhattan'}.");
+    const defined_dist_methods = this.distance_methods();
+    if (!(distance_method in defined_dist_methods)) {
+      console.log("The distance method is not valid.");
       return null;
     }
     if (power == null) power = 1.0;
@@ -1170,4 +1178,176 @@ export default class GeoDaProxy {
     const lisa_obj = this.wasm.multi_quantile_lisa(map_uid, weight_uid, in_ks, in_quantiles, data['values'], data['undefs'], significance_cutoff, permutations, permutation_method, seed);
     return lisa_obj != null ? new GeoDaLisa(lisa_obj, this) : null;
   }
+
+  /**
+   * 
+   * @returns {Array}
+   */
+  redcap_methods() {
+    return {
+      "firstorder-singlelinkage":true, 
+      "fullorder-completelinkage":true, 
+      "fullorder-averagelinkage":true,
+      "fullorder-singlelinkage":true, 
+      "fullorder-wardlinkage":true
+    }
+  }
+
+  /**
+   * 
+   * @param {Object} weights 
+   * @param {Number} k 
+   * @param {Array} values 
+   * @param {Number} min_bound 
+   * @param {Array} bound_vals 
+   * @param {String} scale_method 
+   * @param {String} distance_method 
+   * @returns 
+   */
+  skater(weights, k, values, min_bound, bound_vals, scale_method, distance_method) {
+    return this.redcap(weights, k, values, 'firstorder-singlelinkage', min_bound, bound_vals, scale_method, distance_method);
+  }
+
+  check_scale_method(scale_method) {
+    const defined_scale_methods = this.scale_methods();
+    if (!(scale_method in defined_scale_methods)) {
+      console.log("The scaling method is not valid.");
+      return false;
+    }
+    return true;
+  }
+
+  check_distance_method(distance_method) {
+    const defined_dist_methods = this.distance_methods();
+    if (!(distance_method in defined_dist_methods)) {
+      console.log("The distance method is not valid.");
+      return false;
+    }
+    return true;
+  }
+
+  get_clustering_result(r) {
+    if (r.is_valid()) {
+      return {
+        'clusters': this.parseVecInt(r.clusters()),
+        'total_ss': r.total_ss(),
+        'between_ss': r.between_ss(),
+        'within_ss': this.parseVecDouble(r.within_ss()),
+        'ratio': r.ratio(),
+      }
+    }
+    return null;
+  }
+  /**
+   * 
+   * @param {Object} weights 
+   * @param {Number} k 
+   * @param {Array} values 
+   * @param {String} method 
+   * @param {Number} min_bound 
+   * @param {Array} bound_vals 
+   * @param {String} scale_method 
+   * @param {String} distance_method 
+   * @returns 
+   */
+  redcap(weights, k, values, method, min_bound, bound_vals, scale_method, distance_method) {
+    const redcap_methods = this.redcap_methods();
+    if (!(method in redcap_methods)) {
+      consolo.log("Redcap method is not valid");
+      return null;
+    }
+
+    if (scale_method == null) scale_method = 'standardize';
+    if (distance_method == null) distance_method = 'euclidean';
+    if (!this.check_scale_method(scale_method)) return null;
+    if (!this.check_distance_method(distance_method)) return null;
+
+    const map_uid = weights.get_map_uid();
+    const w_uid = weights.get_uid();
+    const data = this.toVecVecDouble(values);
+
+    if (min_bound == null) min_bound = 0;
+    if (bound_vals == null) bound_vals = [];
+    
+    const r = this.wasm.redcap(map_uid, w_uid, k, method, data['values'], this.toVecDouble(bound_vals), min_bound, scale_method, distance_method);
+    return this.get_clustering_result(r); 
+  }
+
+  /**
+   * 
+   * @returns {Array}
+   */
+  schc_methods() {
+    return {
+      "single" : true, 
+      "complete" : true, 
+      "average" : true,
+      "ward": true
+    }
+  }
+
+  /**
+   * 
+   * @param {Object} weights 
+   * @param {Number} k 
+   * @param {Array} values 
+   * @param {String} method 
+   * @param {Number} min_bound 
+   * @param {Array} bound_vals 
+   * @param {String} scale_method 
+   * @param {String} distance_method 
+   * @returns 
+   */
+  schc(weights, k, values, method, min_bound, bound_vals, scale_method, distance_method) {
+    const schc_methods = this.schc_methods();
+    if (!(method in schc_methods)) {
+      consolo.log("schc method is not valid");
+      return null;
+    }
+
+    if (scale_method == null) scale_method = 'standardize';
+    if (distance_method == null) distance_method = 'euclidean';
+    if (!this.check_scale_method(scale_method)) return null;
+    if (!this.check_distance_method(distance_method)) return null;
+
+    const map_uid = weights.get_map_uid();
+    const w_uid = weights.get_uid();
+    const data = this.toVecVecDouble(values);
+
+    if (min_bound == null) min_bound = 0;
+    if (bound_vals == null) bound_vals = [];
+    
+    const r = this.wasm.schc(map_uid, w_uid, k, method, data['values'], this.toVecDouble(bound_vals), min_bound, scale_method, distance_method);
+    return this.get_clustering_result(r); 
+  }
+
+  azp_greedy(weights, k, values, inits, init_region, scale_method, distance_method, min_bounds_values, min_bounds, max_bounds_values, max_bounds, seed) {
+    if (inits == null) inits = 0;
+    if (init_region == null) init_region = [];
+
+    if (scale_method == null) scale_method = 'standardize';
+    if (distance_method == null) distance_method = 'euclidean';
+    if (!this.check_scale_method(scale_method)) return null;
+    if (!this.check_distance_method(distance_method)) return null;
+
+    const map_uid = weights.get_map_uid();
+    const w_uid = weights.get_uid();
+    const data = this.toVecVecDouble(values);
+
+    if (min_bounds_values == null) min_bounds_values = [];
+    if (min_bounds == null) min_bounds = [];
+    if (max_bounds_values == null) max_bounds_values = [];
+    if (max_bounds == null) max_bounds = [];
+
+    const in_min_bounds_values = this.toVecVecDouble(min_bounds_values)['values'];
+    const in_min_bounds= this.toVecDouble(min_bounds);
+    const in_max_bounds_values = this.toVecVecDouble(max_bounds_values)['values'];
+    const in_max_bounds = this.toVecDouble(max_bounds);
+
+    if (seed == null) seed = 123456789;
+    
+    const r = this.wasm.azp_greedy(map_uid, w_uid, k, data['values'], inits, this.toVecInt(init_region), scale_method, distance_method, in_min_bounds_values, in_min_bounds, in_max_bounds_values, in_max_bounds, seed);
+    return this.get_clustering_result(r); 
+  }
+
 }
