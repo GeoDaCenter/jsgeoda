@@ -26,10 +26,10 @@ const hr60 = geoda.get_col("HR60");
 const lm = geoda.local_moran(w, hr60);
 ```
 
+### Documentation
 
-### Authors
+https://jsgeoda.libgeoda.org
 
-Xun Li, Luc Anselin
 
 
 ### Hands-On Tutorials:
@@ -61,3 +61,7 @@ Xun Li, Luc Anselin
 7. Spatial Clustering
 
 ​https://codesandbox.io/s/7spatialclustering-uvz12
+
+### Authors
+
+Xun Li, Luc Anselin
