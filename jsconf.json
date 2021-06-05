@@ -8,7 +8,7 @@
         "monospaceLinks": true
     },
     "source": {
-        "include": ["index.js", "src/GeoDaProxy.js"], 
+        "include": ["src/index.js", "src/geoda-proxy.js", "src/geoda-lisa.js"], 
         "exclude": [  ],
         "includePattern": ".+\\.js(doc|x)?$",
         "excludePattern": "(^|\\/|\\\\)_"

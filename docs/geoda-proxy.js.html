@@ -1,4 +1,32 @@
-// author: lixun910@gmail.com
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: geoda-proxy.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: geoda-proxy.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// author: lixun910@gmail.com
 // date: 10/7/2020 version 0.0.4
 // date: 5/14/2021 version 0.0.8
 
@@ -33,7 +61,7 @@ export default class GeoDaProxy {
     var result = [];
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i &lt; 12; i++) {
       result.push(characters.charAt(Math.floor(Math.random() *  charactersLength)));
     }
     return "map-" + result.join('');
@@ -156,7 +184,7 @@ export default class GeoDaProxy {
     const latFraction = Math.abs(latRad(ne.lat) - latRad(sw.lat)) / Math.PI;
 
     const lngDiff = ne.lng - sw.lng;
-    const lngFraction = ((lngDiff < 0) ? (lngDiff + 360) : lngDiff) / 360;
+    const lngFraction = ((lngDiff &lt; 0) ? (lngDiff + 360) : lngDiff) / 360;
 
     const map_dim = Math.min(map_height, map_width);
     const latZoom = zoom(map_dim, WORLD_DIM.height, latFraction);
@@ -197,7 +225,7 @@ export default class GeoDaProxy {
     let xx = cc.get_x();
     let yy = cc.get_y();
     var centroids = [];
-    for (let i = 0; i < xx.size(); ++i) {
+    for (let i = 0; i &lt; xx.size(); ++i) {
       centroids.push([xx.get(i), yy.get(i)]);
     }
     return centroids;
@@ -451,9 +479,9 @@ export default class GeoDaProxy {
     const targets = [];
     const sources = [];
 
-    for (let i=0; i<numobs; ++i) {
+    for (let i=0; i&lt;numobs; ++i) {
       const nbrs = this.get_neighbors(weights, i);
-      for (let j=0; j<nbrs.length; ++j) {
+      for (let j=0; j&lt;nbrs.length; ++j) {
         const nn = nbrs[j];
         // add point at arc source
         sources.push({
@@ -486,7 +514,7 @@ export default class GeoDaProxy {
    * @returns {Boolean}
    */
   isInt(n) {
-    return Number(n) === n && n % 1 === 0;
+    return Number(n) === n &amp;&amp; n % 1 === 0;
   }
   
   /**
@@ -496,7 +524,7 @@ export default class GeoDaProxy {
    */
   parseVecInt(vi) {
     let result = [];
-    for (let j = 0; j < vi.size(); ++j) {
+    for (let j = 0; j &lt; vi.size(); ++j) {
       result.push(vi.get(j));
     }
     return result;
@@ -509,10 +537,10 @@ export default class GeoDaProxy {
    */
   parseVecVecInt(vvi) {
     let result = [];
-    for (let i = 0; i < vvi.size(); ++i) {
+    for (let i = 0; i &lt; vvi.size(); ++i) {
       let sub = [];
       let vi = vvi.get(i);
-      for (let j = 0; j < vi.size(); ++j) {
+      for (let j = 0; j &lt; vi.size(); ++j) {
         sub.push(vi.get(j));
       }
       result.push(sub);
@@ -527,10 +555,10 @@ export default class GeoDaProxy {
    */
   parseVecVecDouble(vvd) {
     let result = [];
-    for (let i = 0; i < vvd.size(); ++i) {
+    for (let i = 0; i &lt; vvd.size(); ++i) {
       let sub = [];
       let vd = vvd.get(i);
-      for (let j = 0; j < vd.size(); ++j) {
+      for (let j = 0; j &lt; vd.size(); ++j) {
         sub.push(vd.get(j));
       }
       result.push(sub);
@@ -545,7 +573,7 @@ export default class GeoDaProxy {
    */
   parseVecDouble(vd) {
     let result = []
-    for (let i = 0; i < vd.size(); ++i) {
+    for (let i = 0; i &lt; vd.size(); ++i) {
       result.push(vd.get(i));
     }
     return result;
@@ -558,7 +586,7 @@ export default class GeoDaProxy {
    */
   parseVecString(vd) {
     let result = []
-    for (let i = 0; i < vd.size(); ++i) {
+    for (let i = 0; i &lt; vd.size(); ++i) {
       result.push(vd.get(i));
     }
     return result;
@@ -571,7 +599,7 @@ export default class GeoDaProxy {
    */
   toVecString(input) {
     let vs = new this.wasm.VectorString();
-    for (let i = 0; i < input.length; ++i) {
+    for (let i = 0; i &lt; input.length; ++i) {
       vs.push_back(input[i]);
     }
     return vs;
@@ -584,7 +612,7 @@ export default class GeoDaProxy {
    */
   toVecInt(input) {
     let vs = new this.wasm.VectorInt();
-    for (let i = 0; i < input.length; ++i) {
+    for (let i = 0; i &lt; input.length; ++i) {
       vs.push_back(input[i]);
     }
     return vs;
@@ -597,7 +625,7 @@ export default class GeoDaProxy {
    */
   toVecDouble(input) {
     let vs = new this.wasm.VectorDouble();
-    for (let i = 0; i < input.length; ++i) {
+    for (let i = 0; i &lt; input.length; ++i) {
       if (isNaN(input[i]) || input[i] == Infinity)
         vs.push_back(0);
       else
@@ -615,11 +643,11 @@ export default class GeoDaProxy {
     let vvs = new this.wasm.VecVecDouble();
     let iis = new this.wasm.VecVecInt();
 
-    for (let i = 0; i < input.length; ++i) {
+    for (let i = 0; i &lt; input.length; ++i) {
       let vs = new this.wasm.VectorDouble();
       let is = new this.wasm.VectorInt();
 
-      for (let j=0; j < input[i].length; ++j) {
+      for (let j=0; j &lt; input[i].length; ++j) {
         if (isNaN(input[i][j]) || input[i][j] == Infinity) {
           vs.push_back(0);
           is.push_back(1);
@@ -739,7 +767,7 @@ export default class GeoDaProxy {
 
     let bins = [];
     let id_array = [];
-    for (let i = 0; i < breaks.length; ++i) {
+    for (let i = 0; i &lt; breaks.length; ++i) {
       id_array.push([]);
       let txt = this.isInt(breaks[i]) ? breaks[i] : breaks[i].toFixed(2);
       bins.push("" + txt);
@@ -754,12 +782,12 @@ export default class GeoDaProxy {
     breaks.unshift(Number.NEGATIVE_INFINITY);
     breaks.push(Number.POSITIVE_INFINITY);
 
-    for (let i = 0; i < values.length; ++i) {
+    for (let i = 0; i &lt; values.length; ++i) {
       let v = values[i];
-      for (let j = 0; j < breaks.length - 1; ++j) {
+      for (let j = 0; j &lt; breaks.length - 1; ++j) {
         let min_val = breaks[j];
         let max_val = breaks[j + 1];
-        if (v >= min_val && v < max_val) {
+        if (v >= min_val &amp;&amp; v &lt; max_val) {
           id_array[j].push(i);
           break;
         }
@@ -876,18 +904,18 @@ export default class GeoDaProxy {
     let max_x = x.get(0);
     let min_y = y.get(0);
     let max_y = y.get(0);
-    for (let i = 0; i < x.size(); ++i) {
+    for (let i = 0; i &lt; x.size(); ++i) {
       if (min_x > x.get(i)) min_x = x.get(i);
-      if (max_x < x.get(i)) max_x = x.get(i);
+      if (max_x &lt; x.get(i)) max_x = x.get(i);
       if (min_y > y.get(i)) min_y = y.get(i);
-      if (max_y < y.get(i)) max_y = y.get(i);
+      if (max_y &lt; y.get(i)) max_y = y.get(i);
     }
     let scale_x = 100.0 / (max_x - min_x);
     let scale_y = 45.0 / (max_y - min_y);
 
 
     var result = [];
-    for (let i = 0; i < x.size(); ++i) {
+    for (let i = 0; i &lt; x.size(); ++i) {
       let xx = (x.get(i) - min_x) * scale_x;
       let yy = (y.get(i) - min_y) * scale_y;
       result.push({
@@ -1175,15 +1203,15 @@ export default class GeoDaProxy {
     }
 
     const num_obs = values1.length;
-    for (let i=0; i<num_obs; ++i) {
-      if ((values1[i] != 0 && values1[i] != 1) || (values2[i] != 0 && values2[i] != 1)) {
+    for (let i=0; i&lt;num_obs; ++i) {
+      if ((values1[i] != 0 &amp;&amp; values1[i] != 1) || (values2[i] != 0 &amp;&amp; values2[i] != 1)) {
         console.log("The input data is not binary.");
         return null;
       }
     }
 
-    for (let i=0; i<num_obs; ++i) {
-      if (values1[i] == 1 && values2[i] == 1) {
+    for (let i=0; i&lt;num_obs; ++i) {
+      if (values1[i] == 1 &amp;&amp; values2[i] == 1) {
         console.log("The bivariate local join count only applies on two variables with no-colocation.");
         return null;
       }
@@ -1227,9 +1255,9 @@ export default class GeoDaProxy {
     }
 
     const num_obs = values[0].length;
-    for (let i=0; i<num_vars; ++i) {
-      for (let j=0; j< num_obs; ++j) {
-        if (values[i][j] != 0 && values[i][j] != 1) {
+    for (let i=0; i&lt;num_vars; ++i) {
+      for (let j=0; j&lt; num_obs; ++j) {
+        if (values[i][j] != 0 &amp;&amp; values[i][j] != 1) {
           console.log("The input data is not binary.");
           return null;
         }
@@ -1237,8 +1265,8 @@ export default class GeoDaProxy {
     }
 
     if (num_vars == 2) {
-      for (let i=0; i<num_obs; ++i) {
-        if (values[0][i] == 1 && values[1][i] == 1) {
+      for (let i=0; i&lt;num_obs; ++i) {
+        if (values[0][i] == 1 &amp;&amp; values[1][i] == 1) {
           console.log("The input two variables have no colocations. Please use: local_bijoincount().");
           return null;
         }
@@ -1746,4 +1774,26 @@ export default class GeoDaProxy {
     const r = this.wasm.maxp_tabu(map_uid, w_uid, data['values'], iterations, tabu_length, conv_tabu,  scale_method, distance_method, in_min_bounds_values, in_min_bounds, in_max_bounds_values, in_max_bounds, seed);
     return this.get_clustering_result(r); 
   }
-}
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="module.exports.html">exports</a></li></ul><h3>Global</h3><ul><li><a href="global.html#azp_greedy">azp_greedy</a></li><li><a href="global.html#azp_sa">azp_sa</a></li><li><a href="global.html#azp_tabu">azp_tabu</a></li><li><a href="global.html#call_lisa">call_lisa</a></li><li><a href="global.html#cartogram">cartogram</a></li><li><a href="global.html#check_distance_method">check_distance_method</a></li><li><a href="global.html#check_scale_method">check_scale_method</a></li><li><a href="global.html#custom_breaks">custom_breaks</a></li><li><a href="global.html#distance_methods">distance_methods</a></li><li><a href="global.html#distance_weights">distance_weights</a></li><li><a href="global.html#eb_risk">eb_risk</a></li><li><a href="global.html#excess_risk">excess_risk</a></li><li><a href="global.html#generate_uid">generate_uid</a></li><li><a href="global.html#get_bounds">get_bounds</a></li><li><a href="global.html#get_centroids">get_centroids</a></li><li><a href="global.html#get_clustering_result">get_clustering_result</a></li><li><a href="global.html#get_col">get_col</a></li><li><a href="global.html#get_colnames">get_colnames</a></li><li><a href="global.html#get_connectivity">get_connectivity</a></li><li><a href="global.html#get_maptype">get_maptype</a></li><li><a href="global.html#get_neighbors">get_neighbors</a></li><li><a href="global.html#get_numobs">get_numobs</a></li><li><a href="global.html#get_viewport">get_viewport</a></li><li><a href="global.html#has">has</a></li><li><a href="global.html#hinge15_breaks">hinge15_breaks</a></li><li><a href="global.html#hinge30_breaks">hinge30_breaks</a></li><li><a href="global.html#isInt">isInt</a></li><li><a href="global.html#kernel_knn_weights">kernel_knn_weights</a></li><li><a href="global.html#kernel_weights">kernel_weights</a></li><li><a href="global.html#knn_weights">knn_weights</a></li><li><a href="global.html#local_bijoincount">local_bijoincount</a></li><li><a href="global.html#local_g">local_g</a></li><li><a href="global.html#local_geary">local_geary</a></li><li><a href="global.html#local_gstar">local_gstar</a></li><li><a href="global.html#local_joincount">local_joincount</a></li><li><a href="global.html#local_moran">local_moran</a></li><li><a href="global.html#local_multigeary">local_multigeary</a></li><li><a href="global.html#local_multijoincount">local_multijoincount</a></li><li><a href="global.html#maxp_greedy">maxp_greedy</a></li><li><a href="global.html#maxp_sa">maxp_sa</a></li><li><a href="global.html#maxp_tabu">maxp_tabu</a></li><li><a href="global.html#min_distthreshold">min_distthreshold</a></li><li><a href="global.html#multi_quantile_lisa">multi_quantile_lisa</a></li><li><a href="global.html#natural_breaks">natural_breaks</a></li><li><a href="global.html#neighbor_match_test">neighbor_match_test</a></li><li><a href="global.html#New">New</a></li><li><a href="global.html#parseVecDouble">parseVecDouble</a></li><li><a href="global.html#parseVecInt">parseVecInt</a></li><li><a href="global.html#parseVecString">parseVecString</a></li><li><a href="global.html#parseVecVecDouble">parseVecVecDouble</a></li><li><a href="global.html#parseVecVecInt">parseVecVecInt</a></li><li><a href="global.html#percentile_breaks">percentile_breaks</a></li><li><a href="global.html#quantile_breaks">quantile_breaks</a></li><li><a href="global.html#quantile_lisa">quantile_lisa</a></li><li><a href="global.html#queen_weights">queen_weights</a></li><li><a href="global.html#read_geojson">read_geojson</a></li><li><a href="global.html#read_shapefile">read_shapefile</a></li><li><a href="global.html#redcap">redcap</a></li><li><a href="global.html#redcap_methods">redcap_methods</a></li><li><a href="global.html#rook_weights">rook_weights</a></li><li><a href="global.html#scale_methods">scale_methods</a></li><li><a href="global.html#schc">schc</a></li><li><a href="global.html#schc_methods">schc_methods</a></li><li><a href="global.html#skater">skater</a></li><li><a href="global.html#spatial_eb">spatial_eb</a></li><li><a href="global.html#spatial_lag">spatial_lag</a></li><li><a href="global.html#spatial_rate">spatial_rate</a></li><li><a href="global.html#stddev_breaks">stddev_breaks</a></li><li><a href="global.html#toVecDouble">toVecDouble</a></li><li><a href="global.html#toVecInt">toVecInt</a></li><li><a href="global.html#toVecString">toVecString</a></li><li><a href="global.html#toVecVecDouble">toVecVecDouble</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Fri Jun 04 2021 21:56:01 GMT-0700 (Mountain Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

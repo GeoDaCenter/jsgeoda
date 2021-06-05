@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Home</title>
+    <title>JSDoc: Source: geoda-lisa.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,59 +17,57 @@
 
 <div id="main">
 
-    <h1 class="page-title">Home</h1>
+    <h1 class="page-title">Source: geoda-lisa.js</h1>
 
     
 
 
 
     
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
     <section>
-        <article><h1>jsgeoda</h1>
-<p>jsgeoda is the first javascript library for spatial data analysis with functionalities of choropleth mapping, spatial weights, local indicators of spatial association,  spatial clustering, and cluster analysis. With a few lines of code, you can run spatial data analysis in a web browser or in Node.js:</p>
-<pre class="prettyprint source lang-javascript"><code>import jsgeoda from 'jsgeoda';
+        <article>
+            <pre class="prettyprint source linenums"><code>// author: lixun910@gmail.com
+// date: 10/7/2020 version 0.0.4
+// date: 5/14/2021 version 0.0.8
 
-const geoda = await jsgeoda.New();
+/**
+ * @class
+ * @classdesc GeoDaLisa is a class that wraps the LISAResult
+ */
+export default class GeoDaLisa {
 
-// get geojson 
-const response = await fetch(&quot;./natregimes.geojson&quot;);
-const ab = response.arrayBuffer();
+    /**
+     * 
+     * @param {Object} lisaResult
+     */
+    constructor(lisa, proxy) {
+      /**
+       * psudo-p values
+       */
+      this.pvalues = proxy.parseVecDouble(lisa.significances());
 
-// read geojson in jsgeoda
-const nat = geoda.read_geojson(ab);
+      /**
+       * cluster indicators
+       */
+      this.clusters = proxy.parseVecInt(lisa.clusters());
 
-// create Queen contiguity weights
-const w = geoda.queen_weights(nat);
+      /**
+       * lisa values
+       */
+      this.lisa_values = proxy.parseVecDouble(lisa.lisa_values());
 
-// get values of variable &quot;HR60&quot;
-const hr60 = geoda.get_col(&quot;HR60&quot;);
+      /**
+       * nearest neighbors
+       */
+      this.neighors = proxy.parseVecInt(lisa.nn());
 
-// apply local Moran statistics on variable &quot;HR60&quot;
-const lm = geoda.local_moran(w, hr60);
-</code></pre>
-<h3>Authors</h3>
-<p>Xun Li, Luc Anselin</p></article>
+      this.labels = proxy.parseVecString(lisa.labels());
+
+      this.colors = proxy.parseVecString(lisa.colors());
+    }
+}</code></pre>
+        </article>
     </section>
-
-
 
 
 
