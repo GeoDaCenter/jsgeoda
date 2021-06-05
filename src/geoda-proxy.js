@@ -1321,7 +1321,23 @@ export default class GeoDaProxy {
     return this.get_clustering_result(r); 
   }
 
-  
+ 
+  /**
+   * 
+   * @param {Object} weights 
+   * @param {Number} k 
+   * @param {Array} values 
+   * @param {Number} inits 
+   * @param {Array} init_region 
+   * @param {Array} min_bounds_values 
+   * @param {Array} min_bounds 
+   * @param {Array} max_bounds_values 
+   * @param {Array} max_bounds 
+   * @param {String} scale_method 
+   * @param {String} distance_method 
+   * @param {Number} seed  
+   * @returns 
+   */
   azp_greedy(weights, k, values, inits, init_region, min_bounds_values, min_bounds, max_bounds_values, max_bounds, scale_method, distance_method,  seed) {
     if (inits == null) inits = 0;
     if (init_region == null) init_region = [];
@@ -1351,6 +1367,24 @@ export default class GeoDaProxy {
     return this.get_clustering_result(r); 
   }
 
+  /**
+   * 
+   * @param {Object} weights 
+   * @param {Number} k 
+   * @param {Array} values 
+   * @param {Number} cooling_rate 
+   * @param {Number} sa_maxit 
+   * @param {Number} inits 
+   * @param {Array} init_region 
+   * @param {Array} min_bounds_values 
+   * @param {Array} min_bounds 
+   * @param {Array} max_bounds_values 
+   * @param {Array} max_bounds 
+   * @param {String} scale_method 
+   * @param {String} distance_method 
+   * @param {Number} seed 
+   * @returns 
+   */
   azp_sa(weights, k, values, cooling_rate, sa_maxit, inits, init_region, min_bounds_values, min_bounds, max_bounds_values, max_bounds, scale_method, distance_method,  seed) {
     if (cooling_rate == null) cooling_rate = 0.85;
     if (sa_maxit == null) sa_maxit = 1;
@@ -1382,6 +1416,24 @@ export default class GeoDaProxy {
     return this.get_clustering_result(r); 
   }
 
+  /**
+   * 
+   * @param {Object} weights 
+   * @param {Number} k 
+   * @param {Array} values 
+   * @param {Number} tabu_length 
+   * @param {Number} conv_tabu 
+   * @param {Number} inits 
+   * @param {Array} init_region 
+   * @param {Array} min_bounds_values 
+   * @param {Array} min_bounds 
+   * @param {Array} max_bounds_values 
+   * @param {Array} max_bounds 
+   * @param {String} scale_method 
+   * @param {String} distance_method 
+   * @param {Number} seed  
+   * @returns 
+   */
   azp_tabu(weights, k, values, tabu_length, conv_tabu, inits, init_region, min_bounds_values, min_bounds, max_bounds_values, max_bounds, scale_method, distance_method,  seed) {
     if (tabu_length == null) tabu_length = 10;
     if (conv_tabu == null) conv_tabu = 10;
@@ -1413,4 +1465,141 @@ export default class GeoDaProxy {
     return this.get_clustering_result(r); 
   }
 
+  /**
+   * 
+   * @param {Object} weights 
+   * @param {Array} values 
+   * @param {Number} iterations
+   * @param {Array} min_bounds_values 
+   * @param {Array} min_bounds 
+   * @param {Array} max_bounds_values 
+   * @param {Array} max_bounds 
+   * @param {String} scale_method 
+   * @param {String} distance_method 
+   * @param {Number} seed  
+   * @returns 
+   */
+  maxp_greedy(weights, values, iterations, min_bounds_values, min_bounds, max_bounds_values, max_bounds, scale_method, distance_method,  seed) {
+    if (iterations == null) inits = 1;
+
+    if (scale_method == null) scale_method = 'standardize';
+    if (distance_method == null) distance_method = 'euclidean';
+    if (!this.check_scale_method(scale_method)) return null;
+    if (!this.check_distance_method(distance_method)) return null;
+
+    const map_uid = weights.get_map_uid();
+    const w_uid = weights.get_uid();
+    const data = this.toVecVecDouble(values);
+
+    if (min_bounds_values == null || min_bounds == null) {
+      console.log("maxp needs min_bounds and min_bounds_values arguments.");
+    } 
+
+    if (max_bounds_values == null) max_bounds_values = [];
+    if (max_bounds == null) max_bounds = [];
+
+    const in_min_bounds_values = this.toVecVecDouble(min_bounds_values)['values'];
+    const in_min_bounds= this.toVecDouble(min_bounds);
+    const in_max_bounds_values = this.toVecVecDouble(max_bounds_values)['values'];
+    const in_max_bounds = this.toVecDouble(max_bounds);
+
+    if (seed == null) seed = 123456789;
+    
+    const r = this.wasm.maxp_greedy(map_uid, w_uid, data['values'], iterations, scale_method, distance_method, in_min_bounds_values, in_min_bounds, in_max_bounds_values, in_max_bounds, seed);
+    return this.get_clustering_result(r); 
+  }
+
+  /**
+   * 
+   * @param {Object} weights 
+   * @param {Array} values 
+   * @param {Number} cooling_rate 
+   * @param {Number} sa_maxit 
+   * @param {Number} iterations
+   * @param {Array} min_bounds_values 
+   * @param {Array} min_bounds 
+   * @param {Array} max_bounds_values 
+   * @param {Array} max_bounds 
+   * @param {String} scale_method 
+   * @param {String} distance_method 
+   * @param {Number} seed 
+   * @returns 
+   */
+  maxp_sa(weights, values, cooling_rate, sa_maxit, iterations, min_bounds_values, min_bounds, max_bounds_values, max_bounds, scale_method, distance_method,  seed) {
+    if (cooling_rate == null) cooling_rate = 0.85;
+    if (sa_maxit == null) sa_maxit = 1;
+    if (iterations == null) inits = 1;
+
+    if (scale_method == null) scale_method = 'standardize';
+    if (distance_method == null) distance_method = 'euclidean';
+    if (!this.check_scale_method(scale_method)) return null;
+    if (!this.check_distance_method(distance_method)) return null;
+
+    const map_uid = weights.get_map_uid();
+    const w_uid = weights.get_uid();
+    const data = this.toVecVecDouble(values);
+
+    if (min_bounds_values == null || min_bounds == null) {
+      console.log("maxp needs min_bounds and min_bounds_values arguments.");
+    } 
+
+    if (max_bounds_values == null) max_bounds_values = [];
+    if (max_bounds == null) max_bounds = [];
+
+    const in_min_bounds_values = this.toVecVecDouble(min_bounds_values)['values'];
+    const in_min_bounds= this.toVecDouble(min_bounds);
+    const in_max_bounds_values = this.toVecVecDouble(max_bounds_values)['values'];
+    const in_max_bounds = this.toVecDouble(max_bounds);
+
+    if (seed == null) seed = 123456789;
+    
+    const r = this.wasm.maxp_sa(map_uid, w_uid, data['values'], iterations, cooling_rate, sa_maxit, scale_method, distance_method, in_min_bounds_values, in_min_bounds, in_max_bounds_values, in_max_bounds, seed);
+    return this.get_clustering_result(r); 
+  }
+
+  /**
+   * 
+   * @param {Object} weights 
+   * @param {Array} values 
+   * @param {Number} tabu_length 
+   * @param {Number} conv_tabu 
+   * @param {Number} iterations 
+   * @param {Array} min_bounds_values 
+   * @param {Array} min_bounds 
+   * @param {Array} max_bounds_values 
+   * @param {Array} max_bounds 
+   * @param {String} scale_method 
+   * @param {String} distance_method 
+   * @param {Number} seed  
+   * @returns 
+   */
+  maxp_tabu(weights, values, tabu_length, conv_tabu, iterations, min_bounds_values, min_bounds, max_bounds_values, max_bounds, scale_method, distance_method,  seed) {
+    if (tabu_length == null) tabu_length = 10;
+    if (conv_tabu == null) conv_tabu = 10;
+    if (iterations == null) inits = 1;
+
+    if (scale_method == null) scale_method = 'standardize';
+    if (distance_method == null) distance_method = 'euclidean';
+    if (!this.check_scale_method(scale_method)) return null;
+    if (!this.check_distance_method(distance_method)) return null;
+
+    const map_uid = weights.get_map_uid();
+    const w_uid = weights.get_uid();
+    const data = this.toVecVecDouble(values);
+
+    if (min_bounds_values == null) min_bounds_values = [];
+    if (min_bounds == null) min_bounds = [];
+    if (max_bounds_values == null) max_bounds_values = [];
+    if (max_bounds == null) max_bounds = [];
+
+    const in_min_bounds_values = this.toVecVecDouble(min_bounds_values)['values'];
+    const in_min_bounds= this.toVecDouble(min_bounds);
+    const in_max_bounds_values = this.toVecVecDouble(max_bounds_values)['values'];
+    const in_max_bounds = this.toVecDouble(max_bounds);
+
+    if (seed == null) seed = 123456789;
+    
+    const r = this.wasm.maxp_tabu(map_uid, w_uid, data['values'], iterations, tabu_length, conv_tabu,  scale_method, distance_method, in_min_bounds_values, in_min_bounds, in_max_bounds_values, in_max_bounds, seed);
+    return this.get_clustering_result(r); 
+  }
 }
