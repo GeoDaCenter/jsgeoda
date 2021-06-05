@@ -26,6 +26,12 @@ const hr60 = geoda.get_col("HR60");
 const lm = geoda.local_moran(w, hr60);
 ```
 
+### Installation
+
+```bash
+$ npm i --save jsgeoda
+```
+
 ### Documentation
 
 https://jsgeoda.libgeoda.org
