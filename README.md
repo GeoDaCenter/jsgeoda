@@ -42,31 +42,31 @@ https://jsgeoda.libgeoda.org
 
 1. Hello jsgeoda!
 
-​https://codesandbox.io/s/1-hello-jsgeoda-foq4j​
+https://codesandbox.io/s/1-hello-jsgeoda-foq4j
 
 2. Load spatial data
 
-​https://codesandbox.io/s/2-load-spatial-data-dgcux​
+https://codesandbox.io/s/2-load-spatial-data-dgcux
 
 3. Choropleth Mapping
 
-​https://codesandbox.io/s/3basicmapping-lcguj​
+https://codesandbox.io/s/3basicmapping-lcguj
 
 4. Spatial Weights
 
-​https://codesandbox.io/s/4spatial-weights-owi84​
+https://codesandbox.io/s/4spatial-weights-owi84
 
 5. Univariate LISA
 
-​https://codesandbox.io/s/5lisaunivariate-zhhop​
+https://codesandbox.io/s/5lisaunivariate-zhhop
 
 6. Multivariate LISA
 
-​https://codesandbox.io/s/6lisamultivariate-4w3hk​
+https://codesandbox.io/s/6lisamultivariate-4w3hk
 
 7. Spatial Clustering
 
-​https://codesandbox.io/s/7spatialclustering-uvz12
+https://codesandbox.io/s/7spatialclustering-uvz12
 
 ### Authors
 
