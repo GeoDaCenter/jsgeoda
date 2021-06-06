@@ -5,18 +5,18 @@
 import GeoDaLisa from './geoda-lisa.js';
 
 /**
- * Use jsgeoda.New() to get an instance of GeoDaProxy. See New() {@link New}
+ * Use jsgeoda.New() to get an instance of GeoDaWasm. See New() {@link New}
  * @see New
  * @class
- * @classdesc GeoDaProxy is a class that wraps all the APIs of libgeoda WASM.
- * Always use jsgeoda.{@link New}() to get an instance of GeoDaProxy.
+ * @classdesc GeoDaWasm is a class that wraps all the APIs of libgeoda WASM.
+ * Always use jsgeoda.{@link New}() to get an instance of GeoDaWasm.
  */
-export default class GeoDaProxy {
+export default class GeoDaWasm {
 
   /**
    * Should not be called directy. 
-   * Always use jsgeoda.New() to get an instance of GeoDaProxy.
-   * @constructs GeoDaProxy 
+   * Always use jsgeoda.New() to get an instance of GeoDaWasm.
+   * @constructs GeoDaWasm 
    * @param {Object} wasm The object of libgeoda WASM  
    */
   constructor(wasm) {
@@ -100,8 +100,8 @@ export default class GeoDaProxy {
   }
 
   /**
-   * Check if a geojson map has been read into GeoDaProxy.
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * Check if a geojson map has been read into GeoDaWasm.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @returns {Boolean} Returns True if the geojson map has been read. Otherwise, returns False.
    */
   has(map_uid) {
@@ -110,7 +110,7 @@ export default class GeoDaProxy {
 
   /**
    * Get map bounds
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @returns {Array}
    */
   get_bounds(map_uid) {
@@ -124,7 +124,7 @@ export default class GeoDaProxy {
 
   /**
    * Get viewport for e.g. Deck.gl or GoogleMaps
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @param {Number} map_height 
    * @param {Number} map_width 
    * @returns {Object}
@@ -185,7 +185,7 @@ export default class GeoDaProxy {
    * let nat = geoda.read_geojson("NAT", ab);
    * let cent = geoda.get_centroids(nat);
    * 
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @returns {Array} Returns an array of [x,y] coordinates (no projection applied) of the centroids.
    */
   get_centroids(map_uid) {
@@ -205,7 +205,7 @@ export default class GeoDaProxy {
 
   /**
    * Get the number of observations or rows in the geojson map.
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @returns {Number} Returns the number of observations or rows in the geojson map.
    */
   get_numobs(map_uid) {
@@ -215,7 +215,7 @@ export default class GeoDaProxy {
 
   /**
    * 
-   * @param {String} map_uid  A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid  A unique string represents the geojson map that has been read into GeoDaWasm.
    * @returns Returns the map type of the geojson map
    */
   get_maptype(map_uid) {
@@ -224,7 +224,7 @@ export default class GeoDaProxy {
 
   /**
    * Get the column names of the geojson map
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @returns {Array} Returns the column names
    */
   get_colnames(map_uid) {
@@ -234,7 +234,7 @@ export default class GeoDaProxy {
 
   /**
    * Get the values (numeric|string) of a column or field. 
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @param {String} col_name A string of column or field name.
    * @returns {Array} Returns the values of a column of field. 
    */
@@ -258,7 +258,7 @@ export default class GeoDaProxy {
 
   /**
    * Create a Rook contiguity weights.
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @param {Number} order An integet number for order of contiguity
    * @param {Boolean} include_lower_order Indicate if include lower order when creating weights
    * @param {Number} precision_threshold Used when the precision of the underlying shape file is insufficient to allow for an exact match of coordinates to determine which polygons are neighbors. 
@@ -279,7 +279,7 @@ export default class GeoDaProxy {
 
   /**
    * Create a contiguity weights.
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @param {Number} order An integet number for order of contiguity
    * @param {Boolean} include_lower_order Indicate if include lower order when creating weights
    * @param {Number} precision_threshold Used when the precision of the underlying shape file is insufficient to allow for an exact match of coordinates to determine which polygons are neighbors. 
@@ -300,7 +300,7 @@ export default class GeoDaProxy {
 
   /**
    * Get a distance that guarantees that every observation has at least 1 neighbor.
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @param {Boolean} is_arc  A bool flag indicates if compute arc distance (true) or Euclidean distance (false).
    * @param {Boolean} is_mile A bool flag indicates if the distance unit is mile (true) or km (false). 
    * @returns {Object} An instance of {@link GeoDaWeights}
@@ -319,7 +319,7 @@ export default class GeoDaProxy {
 
   /**
    * Create a K-Nearest Neighbors weights.
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @param {Number} k A positive integer number for k-nearest neighbors
    * @param {Number} power  The power (or exponent) indicates how many times to use the number in a multiplication.
    * @param {Boolean} is_inverse A bool flag indicates whether or not to apply inverse on distance value.
@@ -343,7 +343,7 @@ export default class GeoDaProxy {
 
   /**
    * Create a Distance-based weights.
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @param {Number} dist_thres A positive numeric value of distance threshold used to find neighbors. 
    * @param {Number} power  The power (or exponent) indicates how many times to use the number in a multiplication.
    * @param {Boolean} is_inverse A bool flag indicates whether or not to apply inverse on distance value.
@@ -364,7 +364,7 @@ export default class GeoDaProxy {
   /**
    * Create a (adaptive) KNN kernel weights.
    * 
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @param {Number} k A positive integer number for k-nearest neighbors
    * @param {String} kernel The name of the kernel function, which could be one of the following: * triangular * uniform * quadratic * epanechnikov * quartic * gaussian
    * @param {Boolean} adaptive_bandwidth A bool flag indicates whether to use adaptive bandwidth or the max distance of all observation to their k-nearest neighbors. 
@@ -394,7 +394,7 @@ export default class GeoDaProxy {
    * 
    * Create a kernel weights with fixed bandwidth.
    * 
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @param {Number} bandwidth The bandwidth (distance threshold).
    * @param {String} kernel The name of the kernel function, which could be one of the following: * triangular * uniform * quadratic * epanechnikov * quartic * gaussian
    * @param {Boolean} adaptive_bandwidth A bool flag indicates whether to use adaptive bandwidth or the max distance of all observation to their k-nearest neighbors. 
@@ -711,13 +711,12 @@ export default class GeoDaProxy {
   /**
    * Custom breaks that wraps {'natural_breaks', 'quantile_breaks', 'stddev_breaks', 'hinge15_breaks', 'hinge30_breaks'}
    * 
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
    * @param {String} break_name The break name: {'natural_breaks', 'quantile_breaks', 'stddev_breaks', 'hinge15_breaks', 'hinge30_breaks'}
    * @param {*} values The values of selected variable.
    * @param {*} k The number of breaks.
    * @returns {Object} {'k','bins','breaks','id_array'}
    */
-  custom_breaks(map_uid, break_name, values, k) {
+  custom_breaks(break_name, values, k) {
     var breaks = []; 
     if (break_name === 'natural_breaks') {
       breaks = this.natural_breaks(k, values);
@@ -857,7 +856,7 @@ export default class GeoDaProxy {
    * Create cartogram using the values in the map. 
    * In cartograms, the size of a variable's value corresponds to the size of a shape. 
    * The location of the circles is aligned as closely as possible to the location of the associated area through a nonlinear optimization routine
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @param {Array} values The values that the classify algorithm will be applied on.
    * @returns {Array} Returns an array of circles, which is defined as: 
    * {
@@ -1077,7 +1076,7 @@ export default class GeoDaProxy {
   /**
    * The local neighbor match test is a method to identify significant locations by assessing the extent of overlap between k-nearest neighbors in geographical space and k-nearest neighbors in multi-attribute space.
    * 
-   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaProxy.
+   * @param {String} map_uid A unique string represents the geojson map that has been read into GeoDaWasm.
    * @param {Number} knn k nearest neighbor for both attribute and geographical space
    * @param {Array} data The array of numeric columns that contains the values for neighbor match test
    * @param {String} scale_method The scaling method:  {'raw', 'standardize', 'demean', 'mad', 'range_standardize', 'range_adjust'}. Default: 'standardize'
