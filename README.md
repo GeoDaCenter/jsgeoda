@@ -40,6 +40,7 @@ https://jsgeoda.libgeoda.org
 
 ### Hands-On Tutorials:
 
+
 1. Hello jsgeoda!
 
 https://codesandbox.io/s/1-hello-jsgeoda-foq4j
@@ -67,6 +68,8 @@ https://codesandbox.io/s/6lisamultivariate-4w3hk
 7. Spatial Clustering
 
 https://codesandbox.io/s/7spatialclustering-uvz12
+
+![jsgeoda](https://gblobscdn.gitbook.com/assets%2F-MMxWNyMbqx5YG1sT6E6%2F-MbTjHyVo53-xm01YxSN%2F-MbTjL-sLNcPihx8_IbV%2FScreen%20Shot%202021-06-05%20at%205.33.17%20PM.png?alt=media&token=3d0934a8-fd16-455c-a09b-e8a403f6e5ce)
 
 ### Authors
 
