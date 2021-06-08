@@ -22,13 +22,13 @@ test('Test loading jsgeoda', async(assert) => {
   }
 });
 
-test('Test loading shapefile', async(assert) => {
+test('Test loading geojson', async(assert) => {
   assert.plan(1);
   try {
     const geoda = await jsgeoda.New();
     let ab = fs.readFileSync(NAT_SHP).buffer;
-    let map_uid = geoda.ReadGeojsonMap('natregimes', ab);
-    let num_obs = geoda.GetNumObs(map_uid);
+    let nat = geoda.read_geojson(ab);
+    let num_obs = geoda.get_numobs(nat);
     assert.equal(num_obs,3085);
     assert.end();
   } catch(e) {
@@ -36,13 +36,13 @@ test('Test loading shapefile', async(assert) => {
   }
 });
 
-test('Test GetMapType()', async(assert) => {
+test('Test get_maptype()', async(assert) => {
   assert.plan(1);
   try {
     const geoda = await jsgeoda.New();
     let ab = fs.readFileSync(NAT_SHP).buffer;
-    let map_uid = geoda.ReadGeojsonMap('natregimes', ab);
-    let map_type = geoda.GetMapType(map_uid);
+    let nat = geoda.read_geojson(ab);
+    let map_type = geoda.get_map_type(nat);
     assert.equal(map_type,5);
     assert.end();
   } catch(e) {
@@ -50,6 +50,19 @@ test('Test GetMapType()', async(assert) => {
   }
 });
 
+test('Test get_colnames()', async(assert) => {
+  assert.plan(1);
+  try {
+    const geoda = await jsgeoda.New();
+    let ab = fs.readFileSync(NAT_SHP).buffer;
+    let nat = geoda.read_geojson(ab);
+    let col_names = geoda.get_colnames(nat);
+    assert.equal(col_names[0],'REGIONS');
+    assert.end();
+  } catch(e) {
+    assert.fail(e);
+  }
+});
 
 
 test('Test SKATER', async(assert) => {
@@ -58,14 +71,13 @@ test('Test SKATER', async(assert) => {
     const geoda = await jsgeoda.New();
     let ab = fs.readFileSync(NAT_SHP).buffer;
     const uint8_t_arr = new Uint8Array(ab);
-    let map_uid = geoda.ReadGeojsonMap('natregimes', ab);
 
-    let queen_w = geoda.CreateQueenWeights(map_uid, 1, 0, 0);
-    let w_uid = queen_w.get_uid();
+    let nat = geoda.read_geojson(ab);
+    let w = geoda.queen_weights(nat);
+    const hr60 = geoda.get_col(nat, "HR60");
 
-    let clst = geoda.redcap(map_uid, w_uid, 5, ['HR60'], "", -1, "firstorder-singlelinkage");
-    console.log(clst.length);
-    assert.equal(clst.length, 5);
+    let clst = geoda.skater(w, 5, [hr60]);
+    assert.equal(clst.ratio, 0.28469714844538363);
 
     assert.end();
   } catch(e) {

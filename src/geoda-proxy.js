@@ -82,6 +82,19 @@ export default class GeoDaWasm {
   }
 
   /**
+   * Get map type
+   * @param {String} map_uid 
+   * @returns 
+   */
+  get_map_type(map_uid) {
+    if (!this.has(map_uid)) {
+      console.log("map_uid is not recognized: ", map_uid);
+      return;
+    }
+    return this.geojson_maps[map_uid];
+  }
+
+  /**
    * Deprecated!! Read from shapefile: .shp/.dbf/.shx
    * @param {String} map_uid 
    * @param {ArrayBuffer} data 
@@ -106,6 +119,13 @@ export default class GeoDaWasm {
    */
   has(map_uid) {
     return map_uid in this.geojson_maps;
+  }
+
+  /**
+   * Free the memory used by wasm
+   */
+  free() {
+    this.wasm.free_geojsonmap();
   }
 
   /**
@@ -1465,7 +1485,6 @@ export default class GeoDaWasm {
    * @param {Array} values The list of numeric vectors of selected variable.
    * @param {Number} inits The number of construction re-runs, which is for ARiSeL "automatic regionalization with initial seed location"
    * @param {Array} init_region  The initial regions that the local search starts with. Default is empty. means the local search starts with a random process to "grow" clusters
-   * @param {Number} iterations The number of iterations of greedy algorithm. Defaults to 1.
    * @param {Array} min_bounds_values The list of numeric array of selected minimum bounding variables.
    * @param {Array} min_bounds The list of minimum value that the sum value of bounding variables in each cluster should be greater than.
    * @param {Array} max_bounds_values The list of numeric array of selected maximum bounding variables.
@@ -1514,7 +1533,6 @@ export default class GeoDaWasm {
    * @param {Number} sa_maxit The number of iterations of simulated annealing. Defaults to 1
    * @param {Number} inits The number of construction re-runs, which is for ARiSeL "automatic regionalization with initial seed location"
    * @param {Array} init_region  The initial regions that the local search starts with. Default is empty. means the local search starts with a random process to "grow" clusters
-   * @param {Number} iterations The number of iterations of greedy algorithm. Defaults to 1.
    * @param {Array} min_bounds_values The list of numeric array of selected minimum bounding variables.
    * @param {Array} min_bounds The list of minimum value that the sum value of bounding variables in each cluster should be greater than.
    * @param {Array} max_bounds_values The list of numeric array of selected maximum bounding variables.
@@ -1565,7 +1583,6 @@ export default class GeoDaWasm {
    * @param {Number} conv_tabu The number of non-improving moves. Defaults to 10.
    * @param {Number} inits The number of construction re-runs, which is for ARiSeL "automatic regionalization with initial seed location"
    * @param {Array} init_region  The initial regions that the local search starts with. Default is empty. means the local search starts with a random process to "grow" clusters
-   * @param {Number} iterations The number of iterations of greedy algorithm. Defaults to 1.
    * @param {Array} min_bounds_values The list of numeric array of selected minimum bounding variables.
    * @param {Array} min_bounds The list of minimum value that the sum value of bounding variables in each cluster should be greater than.
    * @param {Array} max_bounds_values The list of numeric array of selected maximum bounding variables.
