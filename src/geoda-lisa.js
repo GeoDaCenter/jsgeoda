@@ -7,34 +7,69 @@
  * @classdesc GeoDaLisa is a class that wraps the LISAResult
  */
 export default class GeoDaLisa {
+  /**
+   * Constructor
+   * @param {Object} lisaResult
+   */
+  constructor(lisa, proxy) {
+    this.pvalues = proxy.constructor.parseVecDouble(lisa.significances());
 
-    /**
-     * 
-     * @param {Object} lisaResult
-     */
-    constructor(lisa, proxy) {
-      /**
-       * psudo-p values
-       */
-      this.pvalues = proxy.parseVecDouble(lisa.significances());
+    this.clusters = proxy.constructor.parseVecInt(lisa.clusters());
 
-      /**
-       * cluster indicators
-       */
-      this.clusters = proxy.parseVecInt(lisa.clusters());
+    this.lisaValues = proxy.constructor.parseVecDouble(lisa.lisa_values());
 
-      /**
-       * lisa values
-       */
-      this.lisa_values = proxy.parseVecDouble(lisa.lisa_values());
+    this.neighbors = proxy.constructor.parseVecInt(lisa.nn());
 
-      /**
-       * nearest neighbors
-       */
-      this.neighors = proxy.parseVecInt(lisa.nn());
+    this.labels = proxy.constructor.parseVecString(lisa.labels());
 
-      this.labels = proxy.parseVecString(lisa.labels());
+    this.colors = proxy.constructor.parseVecString(lisa.colors());
+  }
 
-      this.colors = proxy.parseVecString(lisa.colors());
-    }
+  /**
+   * psudo-p values
+   * @returns {Array}
+   */
+  getPValues() {
+    return this.pvalues;
+  }
+
+  /**
+   * cluster indicators
+   * @returns {Array}
+   */
+  getClusters() {
+    return this.clusters;
+  }
+
+  /**
+   * lisa values
+   * @returns {Array}
+   */
+  getLisaValues() {
+    return this.lisaValues;
+  }
+
+  /**
+   * nearest neighbors
+   * @returns {Array}
+   */
+  getNeighbors() {
+    return this.neighbors;
+  }
+
+  /**
+   * Get labels
+   * @returns {Array}
+   */
+  getLabels() {
+    return this.neighbors;
+  }
+
+  /**
+   * Get colors
+   * @returns {Array}
+   */
+  getColors() {
+    return this.colors;
+  }
 }

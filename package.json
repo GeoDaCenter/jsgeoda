@@ -18,6 +18,9 @@
     "babelify": "^10.0.0",
     "base64-js": "^1.5.1",
     "compression-webpack-plugin": "^7.1.2",
+    "eslint": "^7.28.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.23.4",
     "exports-loader": "^2.0.0",
     "file-loader": "^6.2.0",
     "gulp": "^4.0.2",
@@ -30,7 +33,7 @@
     "webpack-cli": "^4.7.0",
     "worker-loader": "^3.0.8"
   },
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "A js wrapper for jsgeoda-wasm. ",
   "main": "./lib/index.js",
   "repository": {

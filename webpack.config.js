@@ -1,17 +1,16 @@
-const webpack = require("webpack");
-const path = require("path");
-//const CompressionPlugin = require("compression-webpack-plugin");
-
+// const webpack = require('webpack');
+const path = require('path');
+// const CompressionPlugin = require("compression-webpack-plugin");
 
 module.exports = {
-  mode: "production",
-  context: path.resolve(__dirname, "."),
+  mode: 'production',
+  context: path.resolve(__dirname, '.'),
   entry: {
     main: path.resolve(__dirname, './src/index.js'),
   },
   output: {
-    path: path.resolve(__dirname, "lib"),
-    filename: "index.js"
+    path: path.resolve(__dirname, 'lib'),
+    filename: 'index.js',
   },
   // This is necessary due to the fact that emscripten puts both Node and web
   // code into one file. The node part uses Node’s `fs` module to load the wasm
@@ -19,12 +18,8 @@ module.exports = {
   // Issue: https://github.com/kripken/emscripten/issues/6542.
   resolve: {
     fallback: {
-        "fs": false,
-        "path": require.resolve("path-browserify"),
-        //"crypto": require.resolve("crypto-browserify"),
-        //"buffer": require.resolve("buffer/"),
-        //"stream": require.resolve("stream-browserify/"),
+      fs: false,
+      path: require.resolve('path-browserify'),
     },
   },
-  //plugins: [new CompressionPlugin()]
 };
