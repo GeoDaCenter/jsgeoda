@@ -14,16 +14,16 @@ const response = await fetch("./natregimes.geojson");
 const ab = response.arrayBuffer();
 
 // read geojson in jsgeoda
-const nat = geoda.read_geojson(ab);
+const nat = geoda.readGeoJSON(ab);
 
 // create Queen contiguity weights
-const w = geoda.queen_weights(nat);
+const w = geoda.getQueenWeights(nat);
 
 // get values of variable "HR60"
-const hr60 = geoda.get_col("HR60");
+const hr60 = geoda.getcol("HR60");
 
 // apply local Moran statistics on variable "HR60"
-const lm = geoda.local_moran(w, hr60);
+const lm = geoda.localMoran(w, hr60);
 ```
 
 ### Installation
@@ -74,3 +74,6 @@ https://codesandbox.io/s/7spatialclustering-uvz12
 ### Authors
 
 Xun Li, Luc Anselin
+
+
+

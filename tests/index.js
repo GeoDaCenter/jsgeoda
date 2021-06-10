@@ -1,35 +1,29 @@
 const test = require('tape');
 const fs = require('fs');
-const jsgeoda = require('../lib/index.js');
+const jsgeoda = require('../lib/index');
 
 const NAT_SHP = './tests/natregimes.geojson';
 
-test('A passing test', (assert) => {
-  assert.pass('This test will pass.');
-
-  assert.end();
-});
-
 test('Test loading geojson', async (assert) => {
-  assert.plan(1);
+  // assert.plan(1);
   try {
     const geoda = await jsgeoda.New();
     const ab = fs.readFileSync(NAT_SHP).buffer;
     const nat = geoda.readGeoJSON(ab);
-    const numObs = geoda.getNumObs(nat);
+    const numObs = geoda.getNumberObservations(nat);
     assert.equal(numObs, 3085);
 
-    const mapType = geoda.getMapType(nat);
-    assert.equal(mapType, 5);
+    // const mapType = geoda.getMapType(nat);
+    // assert.equal(mapType, 5);
 
     const bounds = geoda.getBounds(nat);
     assert.deepEqual(bounds,
       [-124.731422424316, -66.9698486328125, 24.9559669494629, 49.3717346191406]);
 
-    const colNames = geoda.getColNames(nat);
+    const colNames = geoda.getColumnNames(nat);
     assert.equal(colNames[0], 'REGIONS');
 
-    const hr60 = geoda.getCol(nat, 'HR60');
+    const hr60 = geoda.getColumn(nat, 'HR60');
     assert.equal(hr60[0], 0);
     assert.equal(hr60[1], 0);
     assert.equal(hr60[2], 1.8638634161);
@@ -43,7 +37,7 @@ test('Test loading geojson', async (assert) => {
     const wQueen = geoda.getQueenWeights(nat, 1, false, 0);
     assert.equal(wQueen.sparsity, 0.0019089598070866245);
 
-    const dt = geoda.getMinDistthreshold(nat);
+    const dt = geoda.getMinDistanceThreshold(nat);
     assert.equal(dt, 1.4657759325950894);
 
     const wDist = geoda.getDistanceWeights(nat, dt);
@@ -75,7 +69,7 @@ test('Test loading geojson', async (assert) => {
     assert.deepEqual(pb, [0, 0, 2.7833299411, 11.274974068, 24.8236821873]);
 
     const sdb = geoda.standardDeviationBreaks(hr60);
-    assert.deepEqual(sdb, [-6.795368388288869, -1.1456465602926533, 4.504075267703563, 
+    assert.deepEqual(sdb, [-6.795368388288869, -1.1456465602926533, 4.504075267703563,
       10.15379709569978, 15.803518923695995]);
 
     const h15 = geoda.hinge15Breaks(hr60);
@@ -94,7 +88,7 @@ test('Test loading geojson', async (assert) => {
     assert.equal(lg.getPValues()[0], 0.08);
     assert.equal(lg.getClusters()[0], 0);
 
-    const lgs = geoda.localGstar(wQueen, hr60);
+    const lgs = geoda.localGStar(wQueen, hr60);
     assert.equal(lgs.getLisaValues()[0], 0.000051204525062178665);
     assert.equal(lgs.getPValues()[0], 0.08);
     assert.equal(lgs.getClusters()[0], 0);
@@ -118,7 +112,7 @@ test('Test loading geojson', async (assert) => {
     assert.equal(nmt.cardinality[0], 0);
     assert.equal(nmt.probability[0], -1);
 
-    const lmg = geoda.localMultigeary(wQueen, [hr60, ue60]);
+    const lmg = geoda.localMultiGeary(wQueen, [hr60, ue60]);
     assert.equal(lmg.getLisaValues()[0], 0.346487237886799);
     assert.equal(lmg.getPValues()[0], 0.008);
     assert.equal(lmg.getClusters()[0], 1);
@@ -141,19 +135,20 @@ test('Test loading geojson', async (assert) => {
 });
 
 test('Test SKATER', async (assert) => {
-  assert.plan(1);
+  // assert.plan(1);
   try {
     const geoda = await jsgeoda.New();
     const ab = fs.readFileSync(NAT_SHP).buffer;
     const nat = geoda.readGeoJSON(ab);
     const w = geoda.getQueenWeights(nat);
-    const hr60 = geoda.getCol(nat, 'HR60');
-    const ue60 = geoda.getCol(nat, 'UE60');
+    const hr60 = geoda.getColumn(nat, 'HR60');
+    const ue60 = geoda.getColumn(nat, 'UE60');
 
     const skater = geoda.skater(w, 5, [hr60, ue60]);
     assert.equal(skater.ratio, 0.21185005102397705);
 
     const redcap = geoda.redcap(w, 5, [hr60, ue60], 'firstorder-singlelinkage');
+
     assert.equal(redcap.ratio, 0.21185005102397705);
 
     const redcap1 = geoda.redcap(w, 5, [hr60, ue60], 'fullorder-wardlinkage');
@@ -162,12 +157,12 @@ test('Test SKATER', async (assert) => {
     const schc = geoda.schc(w, 5, [hr60, ue60], 'single');
     assert.equal(schc.ratio, 0.07062100522416408);
 
-    const po60 = geoda.getCol(nat, 'PO60');
+    const po60 = geoda.getColumn(nat, 'PO60');
 
     const azp1 = geoda.azpGreedy(w, 5, [hr60, ue60]);
     assert.equal(azp1.ratio, 0.23233288361575066);
 
-    const azp2 = geoda.azpSa(w, 20, [hr60, ue60], 0.85, 1, 1, [], [po60], [17845200]);
+    const azp2 = geoda.azpSA(w, 20, [hr60, ue60], 0.85, 1, 1, [], [po60], [17845200]);
     assert.equal(azp2.ratio, 0.2747629904558493);
 
     const azp3 = geoda.azpTabu(w, 20, [hr60, ue60], 10, 10, 1, [], [po60], [17845200]);

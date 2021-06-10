@@ -28,33 +28,34 @@
         <article>
             <pre class="prettyprint source linenums"><code>// load webassembly
 // https://gist.github.com/surma/b2705b6cca29357ebea1c9e6e15684cc
-import jsgeoda from './jsgeoda.js';
-import GeoDaWasm from './geoda-proxy.js';
+import jsgeoda from './jsgeoda';
+import GeoDaWasm from './geoda-proxy';
 
-// jsgeoda_wasm is a global variable that caches the return from 
+// jsgeoda_wasm is a global variable that caches the return from
 // initialization of libgeoda WASM module
-var jsgeoda_wasm = null;
+// var jsgeoda_wasm = null;
 
+/**
+ * Create a `GeoDaWasm` instance built using WASM.
+ *
+ * @example
+ * const jsgeoda = require('jsgeoda')
+ * let geoda = await jsgeoda.New()
+ *
+ * @returns {Object} geoda - a GeoDaWasm instance built from WASM
+ */
 function New() {
-  return new Promise((res, rej) => {
-    jsgeoda().then(wasm=>{
-      jsgeoda_wasm = wasm;
-      let geoda_proxy = new GeoDaWasm(wasm);
-      res(geoda_proxy);
+  return new Promise((resolve) => {
+    jsgeoda().then((wasm) => {
+      // jsgeoda_wasm = wasm;
+      const geoda = new GeoDaWasm(wasm);
+      resolve(geoda);
     });
   });
 }
 
-/**
- * Create a `GeoDaWasm` instance built using WASM.
- * 
- * @example
- * const jsgeoda = require('jsgeoda')
- * let geoda = await jsgeoda.New()
- * 
- * @returns {Object} geoda - a GeoDaWasm instance built from WASM
- */
-exports.New = New;</code></pre>
+exports.New = New;
+</code></pre>
         </article>
     </section>
 
@@ -64,13 +65,13 @@ exports.New = New;</code></pre>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="module.exports.html">exports</a></li></ul><h3>Global</h3><ul><li><a href="global.html#azp_greedy">azp_greedy</a></li><li><a href="global.html#azp_sa">azp_sa</a></li><li><a href="global.html#azp_tabu">azp_tabu</a></li><li><a href="global.html#call_lisa">call_lisa</a></li><li><a href="global.html#cartogram">cartogram</a></li><li><a href="global.html#check_distance_method">check_distance_method</a></li><li><a href="global.html#check_scale_method">check_scale_method</a></li><li><a href="global.html#custom_breaks">custom_breaks</a></li><li><a href="global.html#distance_methods">distance_methods</a></li><li><a href="global.html#distance_weights">distance_weights</a></li><li><a href="global.html#eb_risk">eb_risk</a></li><li><a href="global.html#excess_risk">excess_risk</a></li><li><a href="global.html#generate_uid">generate_uid</a></li><li><a href="global.html#get_bounds">get_bounds</a></li><li><a href="global.html#get_centroids">get_centroids</a></li><li><a href="global.html#get_clustering_result">get_clustering_result</a></li><li><a href="global.html#get_col">get_col</a></li><li><a href="global.html#get_colnames">get_colnames</a></li><li><a href="global.html#get_connectivity">get_connectivity</a></li><li><a href="global.html#get_maptype">get_maptype</a></li><li><a href="global.html#get_neighbors">get_neighbors</a></li><li><a href="global.html#get_numobs">get_numobs</a></li><li><a href="global.html#get_viewport">get_viewport</a></li><li><a href="global.html#has">has</a></li><li><a href="global.html#hinge15_breaks">hinge15_breaks</a></li><li><a href="global.html#hinge30_breaks">hinge30_breaks</a></li><li><a href="global.html#isInt">isInt</a></li><li><a href="global.html#kernel_knn_weights">kernel_knn_weights</a></li><li><a href="global.html#kernel_weights">kernel_weights</a></li><li><a href="global.html#knn_weights">knn_weights</a></li><li><a href="global.html#local_bijoincount">local_bijoincount</a></li><li><a href="global.html#local_g">local_g</a></li><li><a href="global.html#local_geary">local_geary</a></li><li><a href="global.html#local_gstar">local_gstar</a></li><li><a href="global.html#local_joincount">local_joincount</a></li><li><a href="global.html#local_moran">local_moran</a></li><li><a href="global.html#local_multigeary">local_multigeary</a></li><li><a href="global.html#local_multijoincount">local_multijoincount</a></li><li><a href="global.html#maxp_greedy">maxp_greedy</a></li><li><a href="global.html#maxp_sa">maxp_sa</a></li><li><a href="global.html#maxp_tabu">maxp_tabu</a></li><li><a href="global.html#min_distthreshold">min_distthreshold</a></li><li><a href="global.html#multi_quantile_lisa">multi_quantile_lisa</a></li><li><a href="global.html#natural_breaks">natural_breaks</a></li><li><a href="global.html#neighbor_match_test">neighbor_match_test</a></li><li><a href="global.html#New">New</a></li><li><a href="global.html#parseVecDouble">parseVecDouble</a></li><li><a href="global.html#parseVecInt">parseVecInt</a></li><li><a href="global.html#parseVecString">parseVecString</a></li><li><a href="global.html#parseVecVecDouble">parseVecVecDouble</a></li><li><a href="global.html#parseVecVecInt">parseVecVecInt</a></li><li><a href="global.html#percentile_breaks">percentile_breaks</a></li><li><a href="global.html#quantile_breaks">quantile_breaks</a></li><li><a href="global.html#quantile_lisa">quantile_lisa</a></li><li><a href="global.html#queen_weights">queen_weights</a></li><li><a href="global.html#read_geojson">read_geojson</a></li><li><a href="global.html#read_shapefile">read_shapefile</a></li><li><a href="global.html#redcap">redcap</a></li><li><a href="global.html#redcap_methods">redcap_methods</a></li><li><a href="global.html#rook_weights">rook_weights</a></li><li><a href="global.html#scale_methods">scale_methods</a></li><li><a href="global.html#schc">schc</a></li><li><a href="global.html#schc_methods">schc_methods</a></li><li><a href="global.html#skater">skater</a></li><li><a href="global.html#spatial_eb">spatial_eb</a></li><li><a href="global.html#spatial_lag">spatial_lag</a></li><li><a href="global.html#spatial_rate">spatial_rate</a></li><li><a href="global.html#stddev_breaks">stddev_breaks</a></li><li><a href="global.html#toVecDouble">toVecDouble</a></li><li><a href="global.html#toVecInt">toVecInt</a></li><li><a href="global.html#toVecString">toVecString</a></li><li><a href="global.html#toVecVecDouble">toVecVecDouble</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="module.exports.html">exports</a></li></ul><h3>Global</h3><ul><li><a href="global.html#azpGreedy">azpGreedy</a></li><li><a href="global.html#azpSA">azpSA</a></li><li><a href="global.html#azpTabu">azpTabu</a></li><li><a href="global.html#callLisa">callLisa</a></li><li><a href="global.html#cartogram">cartogram</a></li><li><a href="global.html#checkDistanceMethod">checkDistanceMethod</a></li><li><a href="global.html#checkInputKernel">checkInputKernel</a></li><li><a href="global.html#checkMapUid">checkMapUid</a></li><li><a href="global.html#checkScaleMethod">checkScaleMethod</a></li><li><a href="global.html#customBreaks">customBreaks</a></li><li><a href="global.html#distanceMethods">distanceMethods</a></li><li><a href="global.html#empiricalBayesRisk">empiricalBayesRisk</a></li><li><a href="global.html#excessRisk">excessRisk</a></li><li><a href="global.html#free">free</a></li><li><a href="global.html#generateUid">generateUid</a></li><li><a href="global.html#getBounds">getBounds</a></li><li><a href="global.html#getCentroids">getCentroids</a></li><li><a href="global.html#getClusteringResult">getClusteringResult</a></li><li><a href="global.html#getClusters">getClusters</a></li><li><a href="global.html#getColors">getColors</a></li><li><a href="global.html#getColumn">getColumn</a></li><li><a href="global.html#getColumnNames">getColumnNames</a></li><li><a href="global.html#getConnectivity">getConnectivity</a></li><li><a href="global.html#getDistanceWeights">getDistanceWeights</a></li><li><a href="global.html#getKernelKnnWeights">getKernelKnnWeights</a></li><li><a href="global.html#getKernelWeights">getKernelWeights</a></li><li><a href="global.html#getKnnWeights">getKnnWeights</a></li><li><a href="global.html#getLabels">getLabels</a></li><li><a href="global.html#getLisaValues">getLisaValues</a></li><li><a href="global.html#getMapType">getMapType</a></li><li><a href="global.html#getMinDistanceThreshold">getMinDistanceThreshold</a></li><li><a href="global.html#getNeighbors">getNeighbors</a></li><li><a href="global.html#getNumberObservations">getNumberObservations</a></li><li><a href="global.html#getPValues">getPValues</a></li><li><a href="global.html#getQueenWeights">getQueenWeights</a></li><li><a href="global.html#getRookWeights">getRookWeights</a></li><li><a href="global.html#getViewport">getViewport</a></li><li><a href="global.html#has">has</a></li><li><a href="global.html#hinge15Breaks">hinge15Breaks</a></li><li><a href="global.html#hinge30Breaks">hinge30Breaks</a></li><li><a href="global.html#isInt">isInt</a></li><li><a href="global.html#localBiJoinCount">localBiJoinCount</a></li><li><a href="global.html#localG">localG</a></li><li><a href="global.html#localGeary">localGeary</a></li><li><a href="global.html#localGStar">localGStar</a></li><li><a href="global.html#localJoinCount">localJoinCount</a></li><li><a href="global.html#localMoran">localMoran</a></li><li><a href="global.html#localMultiGeary">localMultiGeary</a></li><li><a href="global.html#localMultiJoinCount">localMultiJoinCount</a></li><li><a href="global.html#maxpGreedy">maxpGreedy</a></li><li><a href="global.html#maxpSA">maxpSA</a></li><li><a href="global.html#maxpTabu">maxpTabu</a></li><li><a href="global.html#multiQuantileLisa">multiQuantileLisa</a></li><li><a href="global.html#naturalBreaks">naturalBreaks</a></li><li><a href="global.html#neighborMatchTest">neighborMatchTest</a></li><li><a href="global.html#New">New</a></li><li><a href="global.html#parseVecDouble">parseVecDouble</a></li><li><a href="global.html#parseVecInt">parseVecInt</a></li><li><a href="global.html#parseVecString">parseVecString</a></li><li><a href="global.html#parseVecVecDouble">parseVecVecDouble</a></li><li><a href="global.html#parseVecVecInt">parseVecVecInt</a></li><li><a href="global.html#percentileBreaks">percentileBreaks</a></li><li><a href="global.html#quantileBreaks">quantileBreaks</a></li><li><a href="global.html#quantileLisa">quantileLisa</a></li><li><a href="global.html#readGeoJSON">readGeoJSON</a></li><li><a href="global.html#redcap">redcap</a></li><li><a href="global.html#redcapMethods">redcapMethods</a></li><li><a href="global.html#scaleMethods">scaleMethods</a></li><li><a href="global.html#schc">schc</a></li><li><a href="global.html#schcMethods">schcMethods</a></li><li><a href="global.html#skater">skater</a></li><li><a href="global.html#spatialEmpiricalBayes">spatialEmpiricalBayes</a></li><li><a href="global.html#spatialLag">spatialLag</a></li><li><a href="global.html#spatialRate">spatialRate</a></li><li><a href="global.html#standardDeviationBreaks">standardDeviationBreaks</a></li><li><a href="global.html#toVecDouble">toVecDouble</a></li><li><a href="global.html#toVecInt">toVecInt</a></li><li><a href="global.html#toVecString">toVecString</a></li><li><a href="global.html#toVecVecDouble">toVecVecDouble</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Fri Jun 04 2021 22:02:56 GMT-0700 (Mountain Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Wed Jun 09 2021 17:15:46 GMT-0700 (Mountain Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

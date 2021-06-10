@@ -251,15 +251,20 @@ export default class GeoDaWasm {
    * @param {String} mapUid A unique map id
    * @returns {Number} Returns the number of observations or rows in the geojson map.
    */
-  getNumObs(mapUid) {
+  getNumberObservations(mapUid) {
     if (!this.checkMapUid(mapUid)) return null;
     const n = this.wasm.get_num_obs(mapUid);
     return n;
   }
 
   // eslint-disable-next-line camelcase
+  getNumObs(mapUid) {
+    return this.getNumberObservations(mapUid);
+  }
+
+  // eslint-disable-next-line camelcase
   get_numobs(mapUid) {
-    return this.getNumObs(mapUid);
+    return this.getNumberObservations(mapUid);
   }
 
   /**
@@ -267,14 +272,14 @@ export default class GeoDaWasm {
    * @param {String} mapUid  A unique map id.
    * @returns {Array} Returns the column names
    */
-  getColNames(mapUid) {
+  getColumnNames(mapUid) {
     const names = this.wasm.get_col_names(mapUid);
     return GeoDaWasm.parseVecString(names);
   }
 
   // eslint-disable-next-line camelcase
   get_colnames(mapUid) {
-    return this.getColNames(mapUid);
+    return this.getColumnNames(mapUid);
   }
 
   /**
@@ -283,7 +288,7 @@ export default class GeoDaWasm {
    * @param {String} colName A string of column or field name.
    * @returns {Array} Returns the values of a column of field.
    */
-  getCol(mapUid, colName) {
+  getColumn(mapUid, colName) {
     if (!this.checkMapUid(mapUid)) return null;
     const isNumeric = this.wasm.is_numeric_col;
     if (isNumeric) {
@@ -294,9 +299,13 @@ export default class GeoDaWasm {
     return GeoDaWasm.parseVecString(vals);
   }
 
+  getCol(m, c) {
+    return this.getColumn(m, c);
+  }
+
   // eslint-disable-next-line camelcase
   get_col(m, c) {
-    return this.getCol(m, c);
+    return this.getColumn(m, c);
   }
 
   /**
@@ -350,7 +359,7 @@ export default class GeoDaWasm {
    * or km (false).
    * @returns {Number}
    */
-  getMinDistthreshold(mapUid, isArc, isMile) {
+  getMinDistanceThreshold(mapUid, isArc, isMile) {
     if (!this.checkMapUid(mapUid)) return null;
 
     if (isArc == null) isArc = false;
@@ -531,7 +540,7 @@ export default class GeoDaWasm {
     const mapUid = weights.getMapUid();
 
     const centroids = this.getCentroids(mapUid);
-    const numobs = this.getNumObs(mapUid);
+    const numobs = this.getNumberObservations(mapUid);
     const arcs = [];
     const targets = [];
     const sources = [];
@@ -910,7 +919,7 @@ export default class GeoDaWasm {
    * @param {Array} baseValues  The values of an base variable.
    * @returns {Array}
    */
-  ebRisk(eventValues, baseValues) {
+  empiricalBayesRisk(eventValues, baseValues) {
     const r = this.wasm.eb_risk(this.toVecDouble(eventValues),
       this.toVecDouble(baseValues));
     return GeoDaWasm.parseVecDouble(r);
@@ -968,7 +977,7 @@ export default class GeoDaWasm {
    * @param {Array} baseValues  The values of an base variable.
    * @returns {Array}
    */
-  spatialEB(weights, eventValues, baseValues) {
+  spatialEmpiricalBayes(weights, eventValues, baseValues) {
     const mapUid = weights.getMapUid();
     const wUid = weights.getUid();
 
@@ -1069,8 +1078,8 @@ export default class GeoDaWasm {
    * Default: 123456789.
    * @returns {Object} An instance of {@link LisaResult}
    */
-  localGstar(weights, values, permutations, permutationMethod, significanceCutoff, seed) {
-    return this.callLisa('localGstar', weights, values, permutations, permutationMethod, significanceCutoff, seed);
+  localGStar(weights, values, permutations, permutationMethod, significanceCutoff, seed) {
+    return this.callLisa('localGStar', weights, values, permutations, permutationMethod, significanceCutoff, seed);
   }
 
   /**
@@ -1180,7 +1189,7 @@ export default class GeoDaWasm {
     } else if (lisaFunction === 'localG') {
       lisaObj = this.wasm.local_g(mapUid, weightUid, vals, undefsVec, significanceCutoff,
         permutations, permutationMethod, seed);
-    } else if (lisaFunction === 'localGstar') {
+    } else if (lisaFunction === 'localGStar') {
       lisaObj = this.wasm.local_gstar(mapUid, weightUid, vals, undefsVec, significanceCutoff,
         permutations, permutationMethod, seed);
     } else if (lisaFunction === 'localGeary') {
@@ -1297,7 +1306,7 @@ export default class GeoDaWasm {
    * @param {Number} seed The seed for random number generator
    * @returns {Object} LISA object {@link GeoDaLisa}
    */
-  localMultigeary(weights, values, permutations, permutationMethod, significanceCutoff, seed) {
+  localMultiGeary(weights, values, permutations, permutationMethod, significanceCutoff, seed) {
     const mapUid = weights.getMapUid();
     const weightUid = weights.getUid();
 
@@ -1744,7 +1753,7 @@ export default class GeoDaWasm {
    * @returns {Object} Return a ClusteringResult object:
    * {'total_ss', 'within_ss', 'between_ss', 'ratio', 'clusters'}
    */
-  azpSa(weights, k, values, coolingRate, saMaxIt, inits, initRegion, minBoundValues,
+  azpSA(weights, k, values, coolingRate, saMaxIt, inits, initRegion, minBoundValues,
     minBounds, maxBoundValues, maxBounds, scaleMethod, distanceMethod, seed) {
     if (coolingRate == null) coolingRate = 0.85;
     if (saMaxIt == null) saMaxIt = 1;
@@ -1914,7 +1923,7 @@ export default class GeoDaWasm {
    * @returns {Object} Return a ClusteringResult object:
    * {'total_ss', 'within_ss', 'between_ss', 'ratio', 'clusters'}
    */
-  maxpSa(weights, values, coolingRate, saMaxIt, iterations, minBoundValues, minBounds,
+  maxpSA(weights, values, coolingRate, saMaxIt, iterations, minBoundValues, minBounds,
     maxBoundValues, maxBounds, scaleMethod, distanceMethod, seed) {
     if (coolingRate == null) coolingRate = 0.85;
     if (saMaxIt == null) saMaxIt = 1;
