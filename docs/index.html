@@ -60,7 +60,7 @@ const nat = geoda.readGeoJSON(ab);
 const w = geoda.getQueenWeights(nat);
 
 // get values of variable &quot;HR60&quot;
-const hr60 = geoda.getcol(&quot;HR60&quot;);
+const hr60 = geoda.getColumns(&quot;HR60&quot;);
 
 // apply local Moran statistics on variable &quot;HR60&quot;
 const lm = geoda.localMoran(w, hr60);
