@@ -63,6 +63,6 @@
     "lib": "lib"
   },
   "engines": {
-    "node": ">=15"
+    "node": ">=12"
   }
 }
