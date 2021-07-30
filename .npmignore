@@ -6,3 +6,8 @@ tools/
 .gitattributes
 webpack.config.js
 index.js.gz
+.babelrc
+.eslintrc.json
+jsconf.json
+tsconfig.json
+.github/

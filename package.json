@@ -1,5 +1,5 @@
 {
-  "name": "jsgeoda",
+  "name": "@geodacenter/jsgeoda",
   "scripts": {
     "build:wasm": "node tools/binary-to-json src/jsgeoda.wasm > src/jsgeoda-wasm.json",
     "build:bundle": "webpack",
@@ -38,7 +38,7 @@
   "main": "./lib/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lixun910/jsgeoda.git"
+    "url": "git+https://github.com/geodacenter/jsgeoda.git"
   },
   "keywords": [
     "jsgeoda",
@@ -52,9 +52,9 @@
   "author": "Xun Li <lixun910@gmail.com> (http://lixun910.github.io)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/lixun910/jsgeoda/issues"
+    "url": "https://github.com/geodacenter/jsgeoda/issues"
   },
-  "homepage": "https://github.com/lixun910/jsgeoda#readme",
+  "homepage": "https://github.com/geodacenter/jsgeoda#readme",
   "dependencies": {
     "install": "^0.13.0",
     "npm": "^6.14.8"
@@ -64,5 +64,8 @@
   },
   "engines": {
     "node": ">=12"
+  },
+  "publishConfig": {
+    "@geodacenter:registry": "https://npm.pkg.github.com"
   }
 }
