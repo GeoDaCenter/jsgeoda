@@ -1,6 +1,6 @@
 # jsgeoda
 
-
+[![Build jsgeoda](https://github.com/GeoDaCenter/jsgeoda/actions/workflows/build_and_publish.yml/badge.svg)](https://github.com/GeoDaCenter/jsgeoda/actions/workflows/build_and_publish.yml)
 
 jsgeoda is the first javascript library for spatial data analysis with functionalities of choropleth mapping, spatial weights, local indicators of spatial association,  spatial clustering, and cluster analysis. With a few lines of code, you can run spatial data analysis in a web browser or in Node.js:
 
