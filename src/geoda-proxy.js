@@ -73,9 +73,8 @@ export default class GeoDaWasm {
     // Now that we have a block of memory we can copy the file data into that block
     this.wasm.HEAPU8.set(uint8Arr, uint8Ptr);
     // pass the address of the this.wasm memory we just allocated to our function
-    this.wasm.new_geojsonmap(mapUid, uint8Ptr, uint8Arr.length);
-    // this.wasm.ccall("new_geojsonmap", null, ["string", "number", "number"],
-    // [mapUid, uint8_t_ptr, uint8_t_arr.length]);
+    // this.wasm.new_geojsonmap(mapUid, uint8Ptr, uint8Arr.length);
+    this.wasm.ccall('new_geojsonmap', null, ['string', 'number', 'number'], [mapUid, uint8Ptr, uint8Arr.length]);
     // Lastly, according to the docs, we should call ._free here.
 
     // eslint-disable-next-line no-underscore-dangle
