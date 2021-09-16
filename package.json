@@ -7,7 +7,6 @@
     "serve": "http-server",
     "start": "npm run build && npm run serve",
     "doc": "jsdoc -d docs --configure jsconf.json --readme README.md",
-    "publish": "npm run build:bundle && npm publish --access public",
     "test": "tape tests/**/*.js"
   },
   "devDependencies": {
@@ -65,8 +64,5 @@
   },
   "engines": {
     "node": ">=12"
-  },
-  "publishConfig": {
-    "@geodacenter:registry": "https://npm.pkg.github.com"
   }
 }
