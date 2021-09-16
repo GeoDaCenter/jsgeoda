@@ -38,7 +38,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
   publish-gpr:
-    needs: publish-npm
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -50,11 +50,11 @@ jobs:
       - name: publish-gpr
         #if: startsWith(github.ref, 'refs/tags/v')
         run: |
+          npm install
+          npm run build
           echo //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN} > .npmrc
           echo @geodacenter:registry=https://npm.pkg.github.com >> .npmrc
           echo always-auth=true >> .npmrc
-          npm install
-          npm run build
           npm publish
         env:
           # replace ${GITHUB_TOKEN} in .npmrc
