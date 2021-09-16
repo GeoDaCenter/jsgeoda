@@ -65,8 +65,5 @@
   },
   "engines": {
     "node": ">=12"
-  },
-  "publishConfig": {
-    "@geodacenter:registry": "https://npm.pkg.github.com"
   }
 }
