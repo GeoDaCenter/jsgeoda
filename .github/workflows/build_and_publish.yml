@@ -31,7 +31,8 @@ jobs:
       - name: publis-npm
         #if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          npm ci
+          npm install
+          npm run build --if-present
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
@@ -52,7 +53,8 @@ jobs:
           echo //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN} > .npmrc
           echo @geodacenter:registry=https://npm.pkg.github.com >> .npmrc
           echo always-auth=true >> .npmrc
-          npm ci
+          npm install
+          npm run build --if-present
           npm publish
         env:
           # replace ${GITHUB_TOKEN} in .npmrc
