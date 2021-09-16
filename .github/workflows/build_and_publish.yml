@@ -43,3 +43,16 @@ jobs:
       env:
         # replace ${GITHUB_TOKEN} in .npmrc
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+    # Publish to NPM registry
+    - name: Publish to NPM Registry
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        registry-url: https://registry.npmjs.org/
+      run: |
+        rm .npmrc
+        echo //registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN > .npmrc
+        npm publish --access public
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
