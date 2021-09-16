@@ -46,10 +46,6 @@ jobs:
 
     # Publish to NPM registry
     - name: Publish to NPM Registry
-      uses: actions/setup-node@v2
-      with:
-        node-version: ${{ matrix.node-version }}
-        registry-url: https://registry.npmjs.org/
       run: |
         rm .npmrc
         echo //registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN > .npmrc
