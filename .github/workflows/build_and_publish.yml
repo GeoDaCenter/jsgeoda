@@ -45,6 +45,12 @@ jobs:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
     # Publish to NPM registry
+    - name: Use Node.js ${{ matrix.node-version }} for NPM
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        registry-url: https://registry.npmjs.org/
+
     - name: Publish to NPM Registry
       run: |
         rm .npmrc
