@@ -38,7 +38,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      #if: startsWith(github.ref, 'refs/tags/v')
+      if: startsWith(github.ref, 'refs/tags/v')
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
@@ -47,7 +47,7 @@ jobs:
           scope: '@geodacenter'
       - run: npm ci
       - run: |
-        echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> .npmrc
+        echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" > .npmrc
         echo "@geodacenter:registry=https://npm.pkg.github.com" >> .npmrc
         echo "always-auth=true" >> .npmrc
       - run: npm publish
