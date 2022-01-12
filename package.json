@@ -56,8 +56,6 @@
   },
   "homepage": "https://github.com/geodacenter/jsgeoda#readme",
   "dependencies": {
-    "install": "^0.13.0",
-    "npm": "^6.14.8"
   },
   "directories": {
     "lib": "lib"
