@@ -33,7 +33,7 @@
     "webpack-cli": "^4.7.0",
     "worker-loader": "^3.0.8"
   },
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "A js wrapper for libgeoda",
   "main": "./lib/index.js",
   "repository": {
