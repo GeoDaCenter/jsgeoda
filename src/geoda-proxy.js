@@ -267,6 +267,18 @@ export default class GeoDaWasm {
   }
 
   /**
+   * Spatial count e.g. points inside polygons
+   * @param {String} mapUid 
+   * @param {String} aggregateMapUid
+   * @returns 
+   */
+  spatialCount(mapUid, aggregateMapUid) {
+    if (!this.checkMapUid(mapUid) || !this.checkMapUid(aggregateMapUid)) return null;
+    const counts = this.wasm.spatial_count(mapUid, aggregateMapUid);
+    return GeoDaWasm.parseVecDouble(counts);
+  }
+
+  /**
    * Get the column names of the geojson map
    * @param {String} mapUid  A unique map id.
    * @returns {Array} Returns the column names
