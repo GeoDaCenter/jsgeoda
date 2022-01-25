@@ -279,6 +279,37 @@ export default class GeoDaWasm {
   }
 
   /**
+   * Spatial union 
+   * @param {String} mapUid 
+   * @returns {Object}
+   */
+  spatialUnion(mapUid) {
+    if (!this.checkMapUid(mapUid)) return null;
+    const mp = this.wasm.spatial_union(mapUid);
+    const xx = mp.get_x();
+    const yy = mp.get_y();
+    const parts = mp.get_parts();
+
+    let i = 0;
+    let j = 0;
+    const n = xx.size();
+    let count = 0;
+    const multiPolygon = [];
+
+    while (i < n) {
+      if (i === count) {
+        multiPolygon.push([[]]);
+        count += parts.get(j);
+        j += 1;
+      }
+      multiPolygon[j - 1][0].push([xx.get(i), yy.get(i)]);
+      i += 1;
+    }
+    const tmpGeojson = { type: 'Feature', geometry: { type: 'MultiPolygon', coordinates: multiPolygon }, properties: {} };
+    return tmpGeojson;
+  }
+
+  /**
    * Get the column names of the geojson map
    * @param {String} mapUid  A unique map id.
    * @returns {Array} Returns the column names

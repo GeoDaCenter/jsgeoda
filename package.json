@@ -4,6 +4,7 @@
     "build:wasm": "node tools/binary-to-json src/jsgeoda.wasm > src/jsgeoda-wasm.json",
     "build:bundle": "webpack",
     "build": "npm run build:wasm && npm run build:bundle",
+    "test-local": "npm run build && cp lib/index.js ~/unfolded/platform/node_modules/@geodacenter/jsgeoda/lib/index.js",
     "serve": "http-server",
     "start": "npm run build && npm run serve",
     "doc": "jsdoc -d docs --configure jsconf.json --readme README.md",
@@ -33,7 +34,7 @@
     "webpack-cli": "^4.7.0",
     "worker-loader": "^3.0.8"
   },
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "A javascript library for spatial data analysis",
   "main": "./lib/index.js",
   "repository": {
