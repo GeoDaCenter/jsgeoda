@@ -34,7 +34,7 @@
     "webpack-cli": "^4.7.0",
     "worker-loader": "^3.0.8"
   },
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "A javascript library for spatial data analysis",
   "main": "./lib/index.js",
   "repository": {

@@ -292,18 +292,21 @@ export default class GeoDaWasm {
 
     let i = 0;
     let j = 0;
+    let k = 0;
     const n = xx.size();
     let count = 0;
-    const multiPolygon = [];
+    const multiPolygon = Array(parts.size());
 
     while (i < n) {
       if (i === count) {
-        multiPolygon.push([[]]);
+        multiPolygon[j] = [Array(parts.get(j)).fill(null)];
         count += parts.get(j);
         j += 1;
+        k = 0;
       }
-      multiPolygon[j - 1][0].push([xx.get(i), yy.get(i)]);
+      multiPolygon[j - 1][0][k] = [xx.get(i), yy.get(i)];
       i += 1;
+      k += 1;
     }
     const tmpGeojson = { type: 'Feature', geometry: { type: 'MultiPolygon', coordinates: multiPolygon }, properties: {} };
     return tmpGeojson;
