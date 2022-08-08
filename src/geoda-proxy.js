@@ -578,8 +578,18 @@ export default class GeoDaWasm {
    * @param {Number} n
    * @returns {Boolean}
    */
-  static isInt(n) {
+   static isInt(n) {
     return Number(n) === n && n % 1 === 0;
+  }
+
+  /**
+   * Helper function: check if number is an number.
+   *
+   * @param {Any} n
+   * @returns {Boolean}
+   */
+  static isNumber(n) {
+    return isNaN(Number(n)) && [Infinity, -Infinity, null].includes(n);
   }
 
   /**
@@ -691,7 +701,7 @@ export default class GeoDaWasm {
   toVecDouble(input) {
     const vs = new this.wasm.VectorDouble();
     for (let i = 0; i < input.length; i += 1) {
-      if (Number.isNaN(input[i]) || input[i] === Infinity) {
+      if (this.isNumber(input[i])) {
         vs.push_back(0);
       } else {
         vs.push_back(input[i]);
@@ -714,7 +724,7 @@ export default class GeoDaWasm {
       const is = new this.wasm.VectorInt();
 
       for (let j = 0; j < input[i].length; j += 1) {
-        if (Number.isNaN(input[i][j]) || input[i][j] === Infinity) {
+        if (this.isNumber(input[i][j])) {
           vs.push_back(0);
           is.push_back(1);
         } else {
@@ -736,7 +746,7 @@ export default class GeoDaWasm {
    * @returns {Array} Returns an array of break point values.
    */
   naturalBreaks(k, values) {
-    const undefs = values.map((v) => Number.isNaN(v));
+    const undefs = values.map((v) => this.isNumber(v));
     const brks = this.wasm.natural_breaks(k, this.toVecDouble(values),
       this.toVecInt(undefs));
     return GeoDaWasm.parseVecDouble(brks);
@@ -755,7 +765,7 @@ export default class GeoDaWasm {
    * @returns {Array} Returns an array of break point values.
    */
   quantileBreaks(k, values) {
-    const undefs = values.map((v) => Number.isNaN(v));
+    const undefs = values.map((v) => this.isNumber(v));
     const brks = this.wasm.quantile_breaks(k, this.toVecDouble(values),
       this.toVecInt(undefs));
     return GeoDaWasm.parseVecDouble(brks);
@@ -773,7 +783,7 @@ export default class GeoDaWasm {
   * @returns {Array} Returns an array of break point values.
   */
   percentileBreaks(values) {
-    const undefs = values.map((v) => Number.isNaN(v));
+    const undefs = values.map((v) => this.isNumber(v));
     const brks = this.wasm.percentile_breaks(this.toVecDouble(values),
       this.toVecInt(undefs));
     return GeoDaWasm.parseVecDouble(brks);
@@ -786,7 +796,7 @@ export default class GeoDaWasm {
   * @returns {Array} Returns an array of break point values.
   */
   standardDeviationBreaks(values) {
-    const undefs = values.map((v) => Number.isNaN(v));
+    const undefs = values.map((v) => this.isNumber(v));
     const brks = this.wasm.stddev_breaks(this.toVecDouble(values), this.toVecInt(undefs));
     return GeoDaWasm.parseVecDouble(brks);
   }
@@ -803,7 +813,7 @@ export default class GeoDaWasm {
    * @returns {Array} Returns an array of break point values.
    */
   hinge15Breaks(values) {
-    const undefs = values.map((v) => Number.isNaN(v));
+    const undefs = values.map((v) => this.isNumber(v));
     const brks = this.wasm.hinge15_breaks(this.toVecDouble(values),
       this.toVecInt(undefs));
     return GeoDaWasm.parseVecDouble(brks);
@@ -821,7 +831,7 @@ export default class GeoDaWasm {
    * @returns {Array} Returns an array of break point values.
    */
   hinge30Breaks(values) {
-    const undefs = values.map((v) => Number.isNaN(v));
+    const undefs = values.map((v) => this.isNumber(v));
     const brks = this.wasm.hinge30_breaks(this.toVecDouble(values),
       this.toVecInt(undefs));
     return GeoDaWasm.parseVecDouble(brks);
@@ -1140,7 +1150,7 @@ export default class GeoDaWasm {
       return null;
     }
 
-    const undefs = values.map((v) => Number.isNaN(v));
+    const undefs = values.map((v) => this.isNumber(v));
     const undefsVec = this.toVecInt(undefs);
     const vals = this.toVecDouble(values);
 
@@ -1177,7 +1187,7 @@ export default class GeoDaWasm {
       return null;
     }
 
-    const undefs = values.map((v) => Number.isNaN(v));
+    const undefs = values.map((v) => this.isNumber(v));
     const undefsVec = this.toVecInt(undefs);
     const vals = this.toVecDouble(values);
 
