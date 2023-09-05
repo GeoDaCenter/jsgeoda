@@ -67,6 +67,8 @@ typings/
 
 # Yarn Integrity file
 .yarn-integrity
+.yarn/
+.pnp.cjs
 
 # dotenv environment variables file
 .env
