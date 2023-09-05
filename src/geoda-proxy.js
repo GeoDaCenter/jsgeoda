@@ -267,6 +267,52 @@ export default class GeoDaWasm {
   }
 
   /**
+   * Spatial count e.g. points inside polygons
+   * @param {String} mapUid 
+   * @param {String} aggregateMapUid
+   * @returns 
+   */
+  spatialCount(mapUid, aggregateMapUid) {
+    if (!this.checkMapUid(mapUid) || !this.checkMapUid(aggregateMapUid)) return null;
+    const counts = this.wasm.spatial_count(mapUid, aggregateMapUid);
+    return GeoDaWasm.parseVecDouble(counts);
+  }
+
+  /**
+   * Spatial union 
+   * @param {String} mapUid 
+   * @returns {Object}
+   */
+  spatialUnion(mapUid) {
+    if (!this.checkMapUid(mapUid)) return null;
+    const mp = this.wasm.spatial_union(mapUid);
+    const xx = mp.get_x();
+    const yy = mp.get_y();
+    const parts = mp.get_parts();
+
+    let i = 0;
+    let j = 0;
+    let k = 0;
+    const n = xx.size();
+    let count = 0;
+    const multiPolygon = Array(parts.size());
+
+    while (i < n) {
+      if (i === count) {
+        multiPolygon[j] = [Array(parts.get(j)).fill(null)];
+        count += parts.get(j);
+        j += 1;
+        k = 0;
+      }
+      multiPolygon[j - 1][0][k] = [xx.get(i), yy.get(i)];
+      i += 1;
+      k += 1;
+    }
+    const tmpGeojson = { type: 'Feature', geometry: { type: 'MultiPolygon', coordinates: multiPolygon }, properties: {} };
+    return tmpGeojson;
+  }
+
+  /**
    * Get the column names of the geojson map
    * @param {String} mapUid  A unique map id.
    * @returns {Array} Returns the column names
