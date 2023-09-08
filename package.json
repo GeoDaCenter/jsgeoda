@@ -38,6 +38,7 @@
   "version": "0.2.9",
   "description": "A javascript library for spatial data analysis",
   "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/geodacenter/jsgeoda.git"
